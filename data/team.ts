@@ -1,0 +1,58 @@
+import { TeamMember } from '@/types';
+
+export const teamMembers: TeamMember[] = [
+  {
+    id: 'team-hafeez-ahmed',
+    name: 'Hafeez Ahmed',
+    role: 'Founder & Chief Executive Officer',
+    department: 'Executive',
+    photoUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=800&auto=format&fit=crop',
+    bio: 'Over 22 years steering industrial apparel manufacturing, global supply chain optimization, and technological modernization across international OEM export markets.',
+    experienceYears: 22,
+  },
+  {
+    id: 'team-tariq-mahmood',
+    name: 'Eng. Tariq Mahmood',
+    role: 'Head of Textile Engineering & Material Science',
+    department: 'Textile Engineering',
+    photoUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=800&auto=format&fit=crop',
+    bio: 'Specialist in functional polymers, moisture-wicking capillary micro-structures, and eco-sustainable GRS-certified recycled fiber spinning.',
+    experienceYears: 17,
+  },
+  {
+    id: 'team-zainab-malik',
+    name: 'Zainab Malik',
+    role: 'Lead 3D CAD & Master Pattern Director',
+    department: 'Pattern & 3D CAD',
+    photoUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=800&auto=format&fit=crop',
+    bio: 'Pioneering digital sample workflows utilizing CLO 3D, Browzwear, and Optitex to achieve zero-waste sample turnaround in under 72 hours.',
+    experienceYears: 12,
+  },
+  {
+    id: 'team-rashid-khan',
+    name: 'Rashid Khan',
+    role: 'VP of Quality Assurance & International Compliance',
+    department: 'Quality Control',
+    photoUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=800&auto=format&fit=crop',
+    bio: 'Directs AQL 1.0/2.5 multi-stage quality gates, OEKO-TEX® chemical safety compliance, and ISO 9001 factory standard protocols.',
+    experienceYears: 16,
+  },
+  {
+    id: 'team-sarah-jenkins',
+    name: 'Sarah Jenkins',
+    role: 'Director of Global Client Relations & Export Logistics',
+    department: 'Production Logistics',
+    photoUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=800&auto=format&fit=crop',
+    bio: 'Oversees seamless customs clearance, DDP air freight routing, and dedicated account management for North American and European brand partners.',
+    experienceYears: 11,
+  },
+  {
+    id: 'team-adnan-siddiqui',
+    name: 'Adnan Siddiqui',
+    role: 'Master Sublimation & Color Calibration Lead',
+    department: 'Textile Engineering',
+    photoUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=800&auto=format&fit=crop',
+    bio: 'Expert in Japanese high-tension sublimation printing, Delta-E color tolerances, and high-tenacity dye dispersion chemistry.',
+    experienceYears: 14,
+  },
+];

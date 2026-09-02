@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-bg: #FFFFFF;
+  --color-surface: #EDE8DF;
+  --color-surface-alt: #E4DDD1;
+  --color-ink: #111111;
+  --color-ink-alt: #1A1A1A;
+  --color-border: #27272A;
+  --color-border-light: #D8D3C8;
+  --color-muted: #52525B;
+  --color-muted-light: #71717A;
+  --color-burgundy: #6B1D2F;
+  --color-burgundy-hover: #541624;
+  --color-burgundy-active: #3E0F1A;
+  --color-burgundy-light: #FDF2F4;
+  --radius-base: 4px;
+}
+
+* {
+  box-sizing: border-box;
+  border-color: var(--color-border);
+}
+
+html {
+  scroll-behavior: smooth;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-ink);
+  font-feature-settings: "rlig" 1, "calt" 1, "cv11" 1;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Hairline Grid & Border Utilities */
+.border-hairline {
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--color-border);
+}
+
+.border-hairline-light {
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--color-border-light);
+}
+
+.tabular-numbers {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Focus styling with charcoal outline */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+/* Custom Minimalist Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-base);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-ink);
+}
+
+/* Inverted Section Helper */
+.section-inverted {
+  background-color: var(--color-ink);
+  color: #FFFFFF;
+}
+
+.section-inverted * {
+  border-color: #3F3F46;
+}
+
+/* Shimmer / Skeleton for loading states */
+@keyframes subtle-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.animate-subtle-pulse {
+  animation: subtle-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
