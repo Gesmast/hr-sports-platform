@@ -225,7 +225,13 @@ const FONT_OPTIONS = [
   '-',
 ];
 
-const TOP_LOGO_SLOTS = [
+interface LogoSlotConfig {
+  id: string;
+  label: string;
+  allowFlag?: boolean;
+}
+
+const TOP_LOGO_SLOTS: LogoSlotConfig[] = [
   { id: 'left_chest', label: 'Left Chest' },
   { id: 'right_chest', label: 'Right Chest' },
   { id: 'stomach', label: 'Stomach' },
@@ -240,7 +246,7 @@ const TOP_LOGO_SLOTS = [
   { id: 'back_below_name_no', label: 'Back (Below Name/No)' },
 ];
 
-const BOTTOM_LOGO_SLOTS = [
+const BOTTOM_LOGO_SLOTS: LogoSlotConfig[] = [
   { id: 'left_pocket', label: 'Left Pocket' },
   { id: 'right_pocket', label: 'Right Pocket' },
   { id: 'left_side', label: 'Left Side' },
