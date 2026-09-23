@@ -11,10 +11,10 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', isLoading = false, children, disabled, ...props }, ref) => {
     const variantStyles = {
       primary: 'bg-burgundy text-white border-burgundy hover:bg-burgundy-hover hover:border-burgundy-hover active:bg-burgundy-active active:translate-y-[1px]',
-      secondary: 'bg-surface text-ink border-border hover:bg-[#EAEAE2] active:translate-y-[1px]',
-      outline: 'bg-transparent text-ink border-border hover:bg-surface active:translate-y-[1px]',
-      ghost: 'bg-transparent text-ink border-transparent hover:bg-surface active:translate-y-[1px]',
-      inverted: 'bg-surface text-ink border-surface hover:bg-white active:translate-y-[1px]',
+      secondary: 'bg-surface text-white border-border hover:bg-zinc-900 active:translate-y-[1px]',
+      outline: 'bg-transparent text-ink border-border hover:bg-zinc-100 active:translate-y-[1px]',
+      ghost: 'bg-transparent text-ink border-transparent hover:bg-zinc-100 active:translate-y-[1px]',
+      inverted: 'bg-surface text-white border-surface hover:bg-zinc-900 active:translate-y-[1px]',
     };
 
     const sizeStyles = {
@@ -28,7 +28,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         disabled={disabled || isLoading}
         className={cn(
-          'inline-flex items-center justify-center border-hairline rounded-base transition-all duration-150 select-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
+          'inline-flex items-center justify-center whitespace-nowrap shrink-0 border-hairline rounded-full transition-all duration-150 select-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
           variantStyles[variant],
           sizeStyles[size],
           className

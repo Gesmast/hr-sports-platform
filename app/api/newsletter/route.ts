@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Please enter a valid corporate email address',
+          error: 'Please enter a valid email address',
           details: validation.error.flatten(),
         },
         { status: 400 }

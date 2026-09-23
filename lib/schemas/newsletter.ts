@@ -4,7 +4,7 @@ export const newsletterSchema = z.object({
   email: z
     .string()
     .trim()
-    .email('Please provide a valid corporate email address')
+    .email('Please provide a valid email address')
     .max(120, 'Email address is too long'),
 });
 

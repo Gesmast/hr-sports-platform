@@ -4,17 +4,17 @@
 
 :root {
   --color-bg: #FFFFFF;
-  --color-surface: #EDE8DF;
-  --color-surface-alt: #E4DDD1;
+  --color-surface: #000000;
+  --color-surface-alt: #000000;
   --color-ink: #111111;
   --color-ink-alt: #1A1A1A;
   --color-border: #27272A;
   --color-border-light: #D8D3C8;
   --color-muted: #52525B;
   --color-muted-light: #71717A;
-  --color-burgundy: #6B1D2F;
-  --color-burgundy-hover: #541624;
-  --color-burgundy-active: #3E0F1A;
+  --color-burgundy: #950606;
+  --color-burgundy-hover: #7b0505;
+  --color-burgundy-active: #5f0404;
   --color-burgundy-light: #FDF2F4;
   --radius-base: 4px;
 }

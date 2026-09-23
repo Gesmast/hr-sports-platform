@@ -17,7 +17,7 @@ export const BorderCard: React.FC<BorderCardProps> = ({
 }) => {
   const variantStyles = {
     default: 'bg-white border-border text-ink',
-    surface: 'bg-surface border-border text-ink',
+    surface: 'bg-surface border-border text-white',
     dark: 'bg-ink border-zinc-700 text-white',
     outline: 'bg-transparent border-border text-ink',
   };

@@ -42,7 +42,7 @@ export const emailService = {
                 <p style="font-size: 12px; color: #52525B; margin: 4px 0 0 0; text-transform: uppercase; letter-spacing: 0.05em;">OEM & Technical Apparel Manufacturing</p>
               </div>
 
-              <p style="font-size: 15px; line-height: 1.6; margin-bottom: 16px;">Dear <strong>${payload.companyName}</strong> Team,</p>
+              <p style="font-size: 15px; line-height: 1.6; margin-bottom: 16px;">Dear <strong>${payload.companyName || payload.order_by || 'Valued'}</strong> Team,</p>
               
               <p style="font-size: 14px; line-height: 1.6; color: #52525B; margin-bottom: 24px;">
                 We have received your custom manufacturing inquiry. Your production inquiry has been assigned reference number <strong>${referenceId}</strong> and forwarded to our master textile engineering and pattern team.
@@ -129,10 +129,10 @@ export const emailService = {
         body: JSON.stringify({
           from: `HR Sports Quote Intake <${fromEmail}>`,
           to: [adminEmail],
-          subject: `🚨 NEW B2B INQUIRY [${referenceId}] — ${payload.companyName} (${payload.volumeMOQ} pcs)`,
+          subject: `🚨 NEW B2B INQUIRY [${referenceId}] — ${payload.companyName || payload.order_by || 'Direct Inquiry'} (${payload.volumeMOQ} pcs)`,
           html: `
             <div style="font-family: sans-serif; padding: 20px;">
-              <h2>New Manufacturing Inquiry: ${payload.companyName}</h2>
+              <h2>New Manufacturing Inquiry: ${payload.companyName || payload.order_by || 'Direct Inquiry'}</h2>
               <p><strong>Reference ID:</strong> ${referenceId}</p>
               <p><strong>Contact Email:</strong> ${payload.contactEmail}</p>
               <p><strong>Phone:</strong> ${payload.contactPhone || 'N/A'}</p>

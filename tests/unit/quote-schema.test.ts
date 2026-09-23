@@ -8,11 +8,11 @@ describe('Quote Validation Schema', () => {
       companyName: 'Apex Athletic Co.',
       contactEmail: 'procurement@apex.com',
       targetDeliveryDate: 'Within 30 Days',
-      volumeMOQ: 15, // Below MOQ_UNITS (30)
+      volumeMOQ: 10, // Below MOQ_UNITS (15)
       garmentType: 'Pro Performance Jersey',
       materialVariant: 'AeroVent™ Performance Micro-Mesh',
       uploadMode: 'design-help',
-      designNotes: 'Need 15 custom jerseys for testing.',
+      designNotes: 'Need 10 custom jerseys for testing.',
     };
 
     const result = quoteSchema.safeParse(invalidData);
@@ -25,8 +25,13 @@ describe('Quote Validation Schema', () => {
 
   it(`accepts valid quote payloads meeting or exceeding ${MOQ_UNITS} units`, () => {
     const validData = {
+      order_by: 'John Doe',
       companyName: 'Apex Athletic Co.',
       contactEmail: 'procurement@apex.com',
+      lookingFor: 'Custom Sportswear',
+      sport: 'Cricket',
+      kit_selection: 'full_kit',
+      order_type: 'individualized',
       targetDeliveryDate: 'Within 30 Days',
       volumeMOQ: MOQ_UNITS,
       garmentType: 'Pro Performance Jersey',
@@ -78,8 +83,13 @@ describe('Quote Validation Schema', () => {
   it('validates structured design source for both client_provided and requested_from_team', () => {
     // 1. client_provided
     const clientProvidedData = {
+      order_by: 'Ali Raza',
       companyName: 'Bahrain Cricket Federation',
       contactEmail: 'orders@bahraincricket.com',
+      lookingFor: 'Custom Sportswear',
+      sport: 'Cricket',
+      kit_selection: 'full_kit',
+      order_type: 'individualized',
       targetDeliveryDate: '15 / 08 / 2026',
       volumeMOQ: 50,
       garmentType: 'Sublimation T-Shirt',
@@ -96,8 +106,13 @@ describe('Quote Validation Schema', () => {
 
     // 2. requested_from_team with structured brief
     const requestedData = {
+      order_by: 'Ali Raza',
       companyName: 'Bahrain Cricket Federation',
       contactEmail: 'orders@bahraincricket.com',
+      lookingFor: 'Custom Sportswear',
+      sport: 'Cricket',
+      kit_selection: 'full_kit',
+      order_type: 'individualized',
       targetDeliveryDate: '15 / 08 / 2026',
       volumeMOQ: 50,
       garmentType: 'Sublimation T-Shirt',

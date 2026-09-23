@@ -1,7 +1,9 @@
 import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { QuoteSchemaType, GarmentSpecType, LogoPlacementType } from '@/lib/schemas/quote';
 import { SIZE_CHART_PRESETS, DEFAULT_SIZES_ORDER } from './size-charts';
 import { generateIndividualizedSummary, generateUniformSummary } from './roster-compiler';
+import { parseRosterExcel } from '@/lib/excel/parseRosterExcel';
 
 
 /**
@@ -34,35 +36,98 @@ export async function generateQuoteSpecPdf(
   const chartPresetKey = quoteData.size_chart_standard || 'mens_export';
   const sizePreset = SIZE_CHART_PRESETS[chartPresetKey] || SIZE_CHART_PRESETS.mens_export;
 
+  // Extract or parse roster rows from uploaded Excel
+  let roster = quoteData.roster && quoteData.roster.length > 0
+    ? quoteData.roster
+    : quoteData.roster_excel_file
+    ? parseRosterExcel(quoteData.roster_excel_file)
+    : [];
+
   // Build garments array with backward-compatibility fallback
+  const fullFabricName = quoteData.fabric_family && quoteData.fabric_type
+    ? `${quoteData.fabric_family} - ${quoteData.fabric_type}`
+    : (quoteData.fabric_family || quoteData.materialVariant || 'Custom Performance Fabric');
+
   let garments: GarmentSpecType[] = quoteData.garments && quoteData.garments.length > 0
     ? quoteData.garments
-    : [
-        {
-          garment_type: (quoteData.garmentType && quoteData.garmentType.toLowerCase().includes('trouser')) ? 'bottom' : 'top',
-          type_name: quoteData.garmentType || 'Sublimation T-Shirt',
-          colour_mode: 'sublimation',
-          colour_value: quoteData.primaryColor ? `Sublimation (${quoteData.primaryColor})` : 'Sublimation',
-          fabric_name: quoteData.materialVariant || 'SAP Cream Fabric',
-          fabric_gsm: 160,
-          collar_type: 'Collar',
-          button_type: 'Kaaj Buttons',
-          sleeve_length: 'Half Sleeves',
-          panel_piping: '-',
-          logo_application: ['Sublimation'],
-          font_name: '-',
-          logo_placements: [],
-          sizing: {
-            mode: quoteData.order_type || 'uniform',
-            qty_by_size: {},
-          },
-        },
-      ];
+    : [];
+
+  if (garments.length === 0) {
+    const isUniform = quoteData.lookingFor === 'Uniform';
+    const isMerch = quoteData.lookingFor === 'Merch';
+
+    const topName = isUniform
+      ? `${quoteData.uniform_type || 'Uniform'} Top${quoteData.shirt_type ? ` (${quoteData.shirt_type})` : ''}`
+      : isMerch
+      ? `Merch Top / Tee${quoteData.shirt_type ? ` (${quoteData.shirt_type})` : ''}`
+      : `${quoteData.sport || 'Custom'} Jersey${quoteData.shirt_type ? ` (${quoteData.shirt_type})` : ''}`;
+
+    const bottomName = isUniform
+      ? `${quoteData.uniform_type || 'Uniform'} Trouser${quoteData.trouser_method ? ` (${quoteData.trouser_method})` : ''}`
+      : isMerch
+      ? `Merch Bottom${quoteData.trouser_method ? ` (${quoteData.trouser_method})` : ''}`
+      : `${quoteData.sport || 'Custom'} Trouser / Shorts${quoteData.trouser_method ? ` (${quoteData.trouser_method})` : ''}`;
+
+    const topGarment: GarmentSpecType = {
+      garment_type: 'top',
+      type_name: topName,
+      shirt_type: quoteData.shirt_type,
+      neck_style: quoteData.neck_style,
+      collar_type: quoteData.neck_style || 'Round Neck',
+      arm_style: quoteData.arm_style,
+      sleeve_length: quoteData.arm_style || 'Half Sleeves',
+      colour_mode: quoteData.shirt_type?.toLowerCase().includes('sublimation') ? 'sublimation' : 'solid',
+      colour_value: quoteData.shirt_type || 'Custom Sublimation',
+      fabric_name: fullFabricName,
+      fabric_family: quoteData.fabric_family,
+      fabric_type: quoteData.fabric_type,
+      panel_piping: '-',
+      button_type: quoteData.neck_style?.includes('Polo') ? 'Kaaj Buttons' : quoteData.neck_style?.includes('zip') ? 'Zipper' : 'None',
+      logo_application: [quoteData.has_logo === 'yes' ? 'Client Logo' : 'No Logo'],
+      logo_placements: [],
+      sizing: {
+        mode: quoteData.order_type === 'individualized' ? 'individualized' : 'uniform',
+        qty_by_size: quoteData.blanks_by_size || {},
+      },
+    };
+
+    const bottomGarment: GarmentSpecType = {
+      garment_type: 'bottom',
+      type_name: bottomName,
+      trouser_method: quoteData.trouser_method,
+      trouser_cut_sew_method: quoteData.trouser_cut_sew_method,
+      pocket_design: quoteData.pocket_design,
+      pocket_type: quoteData.pocket_design || 'Standard Pocket',
+      trouser_cargo_pockets: quoteData.trouser_cargo_pockets,
+      has_back_pockets: quoteData.has_back_pockets,
+      back_pocket_type: quoteData.back_pocket_type,
+      colour_mode: quoteData.trouser_method === 'Sublimation' ? 'sublimation' : 'solid',
+      colour_value: quoteData.trouser_method || 'Cut & Sew',
+      fabric_name: fullFabricName,
+      fabric_family: quoteData.fabric_family,
+      fabric_type: quoteData.fabric_type,
+      panel_piping: quoteData.trouser_method === 'Cut & Sew' ? quoteData.trouser_cut_sew_method || '-' : '-',
+      logo_application: [quoteData.has_logo === 'yes' ? 'Client Logo' : 'No Logo'],
+      logo_placements: [],
+      sizing: {
+        mode: quoteData.order_type === 'individualized' ? 'individualized' : 'uniform',
+        qty_by_size: quoteData.blanks_by_size || {},
+      },
+    };
+
+    if (quoteData.kit_selection === 'shirt_only') {
+      garments = [topGarment];
+    } else if (quoteData.kit_selection === 'trouser_only') {
+      garments = [bottomGarment];
+    } else {
+      garments = [topGarment, bottomGarment];
+    }
+  }
 
   // Client Meta Fields
   const clientName = safeVal(quoteData.companyName);
   const orderBy = safeVal(quoteData.order_by || quoteData.contactEmail?.split('@')[0] || 'FACTORY DIRECT');
-  const designer = safeVal(quoteData.designer || '-');
+  const inquiryNumber = safeVal(referenceId);
   const orderDate = quoteData.order_date || new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, ' / ');
   const dispatchDate = quoteData.dispatch_date || quoteData.targetDeliveryDate || 'AS AGREED';
   const displayHeading = safeVal(quoteData.team_country_name || quoteData.companyName || 'ATHLETIC SPEC');
@@ -124,9 +189,9 @@ export async function generateQuoteSpecPdf(
     doc.text(orderBy, col2X + 20, margin + 6.5);
 
     doc.setTextColor(colGoldLabel);
-    doc.text('DESIGNER :', col3X, margin + 6.5);
+    doc.text('INQUIRY NO :', col3X, margin + 6.5);
     doc.setTextColor('#FFFFFF');
-    doc.text(designer, col3X + 22, margin + 6.5);
+    doc.text(inquiryNumber, col3X + 24, margin + 6.5);
 
     // Row 2: Order Date & Dispatch Date
     doc.setFontSize(8);
@@ -215,34 +280,40 @@ export async function generateQuoteSpecPdf(
     }
 
     const designSourceText = quoteData.design?.source === 'client_provided'
-      ? 'CLIENT TECH PACK'
-      : quoteData.design?.brief?.style_themes?.length
-      ? `STUDIO BRIEF (${quoteData.design.brief.style_themes[0].toUpperCase()})`
-      : 'STUDIO DESIGN BRIEF';
+      ? 'CLIENT TECH PACK / DESIGN'
+      : 'REQUESTED FROM HR TEAM';
+
+    const logoSpecText = quoteData.has_logo === 'yes' ? 'CLIENT LOGO PROVIDED' : 'NO LOGO';
+    const logoPlacementText = quoteData.logo_placement_note ? safeVal(quoteData.logo_placement_note) : (quoteData.has_logo === 'yes' ? 'AS SPECIFIED' : 'NONE');
 
     const specRows: SpecRow[] = isBottom
       ? [
           { label: 'BOTTOM TYPE', value: safeVal(garment.type_name) },
+          { label: 'MANUFACTURING', value: safeVal(garment.trouser_method || quoteData.trouser_method) },
+          ...((garment.trouser_method === 'Cut & Sew' || quoteData.trouser_method === 'Cut & Sew')
+            ? [{ label: 'CUT & SEW METHOD', value: safeVal(garment.trouser_cut_sew_method || quoteData.trouser_cut_sew_method) }]
+            : []),
+          { label: 'POCKET DESIGN', value: safeVal(garment.pocket_design || quoteData.pocket_design) },
+          ...(quoteData.lookingFor === 'Uniform' && (garment.trouser_cargo_pockets || quoteData.trouser_cargo_pockets)
+            ? [{ label: 'UNIFORM POCKETS', value: safeVal(garment.trouser_cargo_pockets || quoteData.trouser_cargo_pockets) }]
+            : []),
+          ...(quoteData.lookingFor === 'Uniform' && (garment.has_back_pockets || quoteData.has_back_pockets)
+            ? [{ label: 'BACK POCKETS', value: garment.has_back_pockets === 'Yes' || quoteData.has_back_pockets === 'Yes' ? `YES (${safeVal(garment.back_pocket_type || quoteData.back_pocket_type)})` : 'NO' }]
+            : []),
+          { label: 'FABRIC', value: safeVal(garment.fabric_name || fullFabricName) },
+          { label: 'LOGO SPEC', value: logoSpecText },
+          { label: 'LOGO PLACEMENT', value: logoPlacementText },
           { label: 'DESIGN SOURCE', value: designSourceText },
-          { label: 'COLOUR', value: safeVal(garment.colour_value) },
-          { label: 'FABRIC TYPE', value: safeVal(garment.fabric_name) },
-          { label: 'PANEL & PIPING TYPE', value: safeVal(garment.panel_piping) },
-          { label: 'LOGOS / LOGO SIZE', value: garment.logo_application?.length ? garment.logo_application.join(', ').toUpperCase() : safeVal(garment.colour_mode) },
-          { label: 'LENGTH & BOTTOM', value: safeVal(garment.cuff_type) },
-          { label: 'FLY', value: safeVal(garment.fly_type) },
-          { label: 'POCKET', value: safeVal(garment.pocket_type) },
         ]
       : [
-          { label: 'TOP TYPE', value: safeVal(garment.type_name) },
+          { label: 'TOP TYPE', value: safeVal(garment.shirt_type || garment.type_name || quoteData.shirt_type) },
+          { label: 'NECK STYLE', value: safeVal(garment.neck_style || quoteData.neck_style || garment.collar_type) },
+          { label: 'ARM STYLE', value: safeVal(garment.arm_style || quoteData.arm_style || garment.sleeve_length) },
+          { label: 'FABRIC', value: safeVal(garment.fabric_name || fullFabricName) },
+          { label: 'BUTTON / ZIP', value: safeVal(garment.button_type) },
+          { label: 'LOGO SPEC', value: logoSpecText },
+          { label: 'LOGO PLACEMENT', value: logoPlacementText },
           { label: 'DESIGN SOURCE', value: designSourceText },
-          { label: 'COLOUR', value: safeVal(garment.colour_value) },
-          { label: 'FABRIC', value: safeVal(garment.fabric_name) },
-          { label: 'COLLAR TYPE', value: safeVal(garment.collar_type) },
-          { label: 'BUTTON TYPE', value: safeVal(garment.button_type) },
-          { label: 'SLEEVE LENGTH', value: safeVal(garment.sleeve_length) },
-          { label: 'PANEL & PIPING TYPE', value: safeVal(garment.panel_piping) },
-          { label: 'FONT NAME', value: safeVal(garment.font_name) },
-          { label: 'LOGOS', value: garment.logo_application?.length ? garment.logo_application.join(', ').toUpperCase() : 'SUBLIMATION' },
         ];
 
     const rowH = 4.8;
@@ -441,18 +512,26 @@ export async function generateQuoteSpecPdf(
     if (frontMockup && frontMockup.startsWith('data:image')) imageFiles.push(frontMockup);
     if (backMockup && backMockup.startsWith('data:image')) imageFiles.push(backMockup);
     uploadedFiles.forEach((f) => {
-      if (f.startsWith('data:image') || /\.(png|jpg|jpeg|svg|webp)/i.test(f)) {
+      if (typeof f === 'string' && (f.startsWith('data:image') || /\.(png|jpg|jpeg|svg|webp)/i.test(f))) {
         if (!imageFiles.includes(f)) imageFiles.push(f);
+      }
+    });
+    (quoteData.designFiles || []).forEach((df: any) => {
+      const url = typeof df === 'string' ? df : (df?.previewUrl || df?.storageUrl || '');
+      if (url && (url.startsWith('data:image') || /\.(png|jpg|jpeg|svg|webp)/i.test(url))) {
+        if (!imageFiles.includes(url)) imageFiles.push(url);
       }
     });
 
     const isPdfUpload = uploadedFiles.some(
-      (f) => f.startsWith('data:application/pdf') || /\.pdf/i.test(f)
+      (f) => typeof f === 'string' && (f.startsWith('data:application/pdf') || /\.pdf/i.test(f))
     ) || (quoteData.designFiles || []).some(
-      (df) => df.extension.toLowerCase().includes('pdf') || df.fileName.toLowerCase().includes('pdf')
+      (df: any) => typeof df === 'string'
+        ? (df.startsWith('data:application/pdf') || /\.pdf/i.test(df))
+        : (df && typeof df === 'object' && ((df.extension && String(df.extension).toLowerCase().includes('pdf')) || (df.fileName && String(df.fileName).toLowerCase().includes('pdf'))))
     );
     const pdfFileName = (quoteData.designFiles || []).find(
-      (df) => df.extension.toLowerCase().includes('pdf') || df.fileName.toLowerCase().includes('pdf')
+      (df: any) => typeof df === 'object' && df && ((df.extension && String(df.extension).toLowerCase().includes('pdf')) || (df.fileName && String(df.fileName).toLowerCase().includes('pdf')))
     )?.fileName || 'client-master-techpack.pdf';
 
     if (isClientProvided) {
@@ -535,11 +614,11 @@ export async function generateQuoteSpecPdf(
         const btnY = mockupAreaY + 42;
 
         const pdfDownloadUrl = (uploadedFiles.find(
-          (f) => f.startsWith('data:application/pdf') || /\.pdf/i.test(f) || f.startsWith('http')
+          (f) => typeof f === 'string' && (f.startsWith('data:application/pdf') || /\.pdf/i.test(f) || f.startsWith('http'))
         )) || (quoteData.designFiles || []).find(
-          (df) => df.storageUrl || df.previewUrl
+          (df: any) => typeof df === 'object' && df && (df.storageUrl || df.previewUrl)
         )?.storageUrl || (quoteData.designFiles || []).find(
-          (df) => df.storageUrl || df.previewUrl
+          (df: any) => typeof df === 'object' && df && (df.storageUrl || df.previewUrl)
         )?.previewUrl || '';
 
         const downloadUrl = pdfDownloadUrl || `mailto:${quoteData.contactEmail}?subject=Client%20PDF%20Tech%20Pack%20${referenceId}`;
@@ -737,74 +816,96 @@ export async function generateQuoteSpecPdf(
     // =========================================================================
     const breakdownY = mockupAreaY + mockupAreaH + 4;
 
-    if (quoteData.order_type === 'individualized' && !isBottom) {
-      // Section Header in Bold Red (matching OMTEX sample)
-      const sleeveTitle = garment.sleeve_length ? garment.sleeve_length.toUpperCase() : 'HALF SLEEVE';
-      const typeTitle = garment.type_name ? garment.type_name.toUpperCase() : 'T-SHIRTS';
-      const breakdownTitle = `${sleeveTitle} ${typeTitle} SIZES (EACH PLAYER 2 QTY)`;
-
-      const summary = generateIndividualizedSummary(
-        quoteData.roster || [],
-        quoteData.blanks_by_size || {},
-        breakdownTitle,
-        sizePreset.sizes.map((s) => s.size)
-      );
+    if (quoteData.order_type === 'individualized') {
+      const typeTitle = isBottom ? 'BOTTOM GARMENT' : 'TOP GARMENT';
+      const breakdownTitle = `${typeTitle} - PLAYER NAMES & NUMBERS BREAKDOWN`;
 
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(8.5);
       doc.setTextColor(colRedText);
-      doc.text(summary.title, visualX + visualW / 2, breakdownY, { align: 'center' });
+      doc.text(breakdownTitle, visualX + visualW / 2, breakdownY, { align: 'center' });
 
-      // Breakdown Lines in Bold Blue
       let lineY = breakdownY + 5;
-      doc.setFontSize(7.2);
+      doc.setFontSize(7.5);
       doc.setTextColor(colBlueText);
 
-      summary.lines.forEach((line) => {
-        // Highlight blank portions or wrap neatly
-        const wrapped = doc.splitTextToSize(line, visualW - 10);
-        wrapped.forEach((wLine: string) => {
-          doc.text(wLine, visualX + visualW / 2, lineY, { align: 'center' });
-          lineY += 4.2;
+      if (roster && roster.length > 0) {
+        const mappedRoster = roster.map((p: any) => ({
+          ...p,
+          size: isBottom ? (p.bottom_size || p.size || 'M') : (p.top_size || p.size || 'M'),
+        }));
+
+        const summary = generateIndividualizedSummary(
+          mappedRoster,
+          quoteData.blanks_by_size || {},
+          breakdownTitle,
+          sizePreset.sizes.map((s) => s.size)
+        );
+
+        const maxLines = Math.min(summary.lines.length, 3);
+        summary.lines.slice(0, maxLines).forEach((line) => {
+          const wrapped = doc.splitTextToSize(line, visualW - 10);
+          wrapped.slice(0, 1).forEach((wLine: string) => {
+            doc.text(wLine, visualX + visualW / 2, lineY, { align: 'center' });
+            lineY += 4;
+          });
         });
-      });
 
-      // Total Quantity in Bold Red
-      doc.setFontSize(9.5);
-      doc.setTextColor(colRedText);
-      doc.text(`TOTAL ${summary.totalQty} QTY`, visualX + visualW / 2, lineY + 1.5, { align: 'center' });
+        if (summary.lines.length > 3) {
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(6.5);
+          doc.setTextColor('#64748B');
+          doc.text(`+ ${summary.lines.length - 3} more sizes (see full Player Manifest on Page ${garments.length + 1})`, visualX + visualW / 2, lineY, { align: 'center' });
+          lineY += 4;
+        }
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9.5);
+        doc.setTextColor(colRedText);
+        const total = summary.totalQty || quoteData.volumeMOQ || 50;
+        doc.text(`TOTAL ${total} PIECES (MOQ: 50)`, visualX + visualW / 2, lineY + 1, { align: 'center' });
+      } else {
+        const excelName = quoteData.roster_excel_file_name || 'Player_Names_&_Numbers.xlsx';
+        doc.text(`Completed Player Excel Sheet Attached: ${excelName}`, visualX + visualW / 2, lineY, { align: 'center' });
+        lineY += 4.5;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(6.8);
+        doc.setTextColor('#475569');
+        doc.text('Production will map each player jersey & bottom according to the uploaded spreadsheet.', visualX + visualW / 2, lineY, { align: 'center' });
+        lineY += 4.5;
+
+        // Total Quantity in Bold Red
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9.5);
+        doc.setTextColor(colRedText);
+        doc.text(`TOTAL ${quoteData.volumeMOQ || 50} PIECES (MOQ: 50)`, visualX + visualW / 2, lineY + 1.5, { align: 'center' });
+      }
     } else {
-      // Uniform Sizing (or Bottom Trouser breakdown matching sample page 2)
       const garmentTitle = isBottom
-        ? `TROUSER SIZES (${sizePreset.label.includes('MEN') ? "MEN'S" : sizePreset.label})`
+        ? `TROUSER / BOTTOM SIZES (${sizePreset.label.includes('MEN') ? "MEN'S" : sizePreset.label})`
         : `${garment.type_name.toUpperCase()} SIZES`;
-
-      const qtyBySize = garment.sizing?.qty_by_size || {};
-      const summary = generateUniformSummary(
-        qtyBySize,
-        garmentTitle,
-        sizePreset.sizes.map((s) => s.size)
-      );
 
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(9.5);
       doc.setTextColor(colBlueText);
-      doc.text(summary.title, visualX + visualW / 2, breakdownY, { align: 'center' });
+      doc.text(garmentTitle, visualX + visualW / 2, breakdownY, { align: 'center' });
 
       let lineY = breakdownY + 5.5;
       doc.setFontSize(8.5);
 
-      if (summary.lines.length > 0) {
-        summary.lines.forEach((line) => {
-          doc.text(line, visualX + visualW / 2, lineY, { align: 'center' });
-          lineY += 4.5;
-        });
+      const blanks = quoteData.blanks_by_size || garment.sizing?.qty_by_size || {};
+      const activeSizes = Object.entries(blanks).filter(([_, qty]) => Number(qty) > 0);
+
+      if (activeSizes.length > 0) {
+        const sizeStr = activeSizes.map(([sz, qty]) => `${sz}: ${qty} PCS`).join('   •   ');
+        doc.setTextColor('#0F172A');
+        doc.text(sizeStr, visualX + visualW / 2, lineY, { align: 'center' });
+        lineY += 5;
       } else {
-        // Fallback if no specific size map
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(8);
         doc.setTextColor('#64748B');
-        doc.text(`ORDER VOLUME: ${quoteData.volumeMOQ || 30} UNITS (STANDARD RATIO S-2XL)`, visualX + visualW / 2, lineY, { align: 'center' });
+        doc.text(`ORDER VOLUME: ${quoteData.volumeMOQ || 50} PIECES (STANDARD RATIO XS-2XL)`, visualX + visualW / 2, lineY, { align: 'center' });
         lineY += 5;
       }
 
@@ -812,9 +913,124 @@ export async function generateQuoteSpecPdf(
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(10);
       doc.setTextColor(colBlueText);
-      const totalCount = summary.totalQty > 0 ? summary.totalQty : (quoteData.volumeMOQ || 30);
-      doc.text(`TOTAL ${totalCount} QTY`, visualX + visualW / 2, lineY + 2, { align: 'center' });
+      const totalCount = activeSizes.reduce((acc, [_, qty]) => acc + Number(qty), 0) || (quoteData.volumeMOQ || 50);
+      doc.text(`TOTAL ${totalCount} PIECES`, visualX + visualW / 2, lineY + 2, { align: 'center' });
     }
+  }
+
+  // =========================================================================
+  // DEDICATED PAGE: PLAYER ROSTER & CUSTOMIZATION MANIFEST TABLE
+  // =========================================================================
+  if (quoteData.order_type === 'individualized' && roster && roster.length > 0) {
+    doc.addPage('a4', 'landscape');
+
+    // Header Strip (matching dark banner)
+    doc.setFillColor(colSlateHeader);
+    doc.rect(margin, margin, pageWidth - margin * 2, 16, 'F');
+
+    // Brand Badge
+    doc.setFillColor('#FFFFFF');
+    doc.roundedRect(margin + 2, margin + 2, 28, 12, 1, 1, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor('#0F172A');
+    doc.text('HR SPORTS', margin + 16, margin + 7.5, { align: 'center' });
+    doc.setFontSize(5.5);
+    doc.setTextColor('#64748B');
+    doc.text('ROSTER MANIFEST', margin + 16, margin + 11.5, { align: 'center' });
+
+    // Client, Order, Inquiry #
+    const col1X = margin + 35;
+    const col2X = margin + 120;
+    const col3X = margin + 195;
+
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(colGoldLabel);
+    doc.text('CLIENT NAME :', col1X, margin + 6.5);
+    doc.setTextColor('#FFFFFF');
+    doc.text(clientName, col1X + 26, margin + 6.5);
+
+    doc.setTextColor(colGoldLabel);
+    doc.text('ORDER BY :', col2X, margin + 6.5);
+    doc.setTextColor('#FFFFFF');
+    doc.text(orderBy, col2X + 20, margin + 6.5);
+
+    doc.setTextColor(colGoldLabel);
+    doc.text('INQUIRY NO :', col3X, margin + 6.5);
+    doc.setTextColor('#FFFFFF');
+    doc.text(inquiryNumber, col3X + 24, margin + 6.5);
+
+    doc.setFontSize(8);
+    doc.setTextColor('#E2E8F0');
+    doc.text('SOURCE FILE       :', col1X, margin + 12.5);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor('#FFFFFF');
+    doc.text(quoteData.roster_excel_file_name || 'Imported from Excel', col1X + 26, margin + 12.5);
+
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(colGoldLabel);
+    doc.text('TOTAL PLAYERS :', col2X, margin + 12.5);
+    doc.setTextColor('#FFFFFF');
+    doc.text(`${roster.length} PLAYERS`, col2X + 26, margin + 12.5);
+
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(colRedText);
+    doc.text('DISPATCH DATE :', col3X, margin + 12.5);
+    doc.setTextColor(colRedText);
+    doc.text(dispatchDate, col3X + 26, margin + 12.5);
+
+    // Title text above table
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(13);
+    doc.setTextColor('#0F172A');
+    doc.text('PLAYER NAMES, NUMBERS & SIZE SPECIFICATIONS', margin, margin + 24);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor('#64748B');
+    doc.text('Imported directly from client Excel sheet. Factory cutting floor & sublimation plotting must strictly follow this manifest.', margin, margin + 29);
+
+    const tableBody = roster.map((p: any, idx: number) => [
+      String(p.serial_number || (idx + 1)),
+      String(p.player_name || '-').toUpperCase(),
+      String(p.number || '-'),
+      String(p.top_size || p.size || '-').toUpperCase(),
+      String(p.bottom_size || '-').toUpperCase(),
+      String(p.qty || 1),
+    ]);
+
+    const autoTableFn = (autoTable as any).default || autoTable;
+    autoTableFn(doc, {
+      startY: margin + 32,
+      margin: { left: margin, right: margin, bottom: margin },
+      head: [['SR #', 'JERSEY NAME', 'JERSEY NUMBER', 'TOP SIZE', 'BOTTOM SIZE', 'QTY']],
+      body: tableBody,
+      theme: 'grid',
+      headStyles: {
+        fillColor: [107, 15, 43],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        fontSize: 8,
+        halign: 'center',
+      },
+      bodyStyles: {
+        fontSize: 7.5,
+        textColor: [15, 23, 42],
+        halign: 'center',
+      },
+      columnStyles: {
+        0: { cellWidth: 18, halign: 'center' },
+        1: { cellWidth: 80, halign: 'left', fontStyle: 'bold' },
+        2: { cellWidth: 35, halign: 'center', fontStyle: 'bold', textColor: [30, 64, 175] },
+        3: { cellWidth: 35, halign: 'center' },
+        4: { cellWidth: 35, halign: 'center' },
+        5: { halign: 'center' },
+      },
+      alternateRowStyles: {
+        fillColor: [248, 250, 252],
+      },
+    });
   }
 
   return doc;

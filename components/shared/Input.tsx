@@ -13,21 +13,25 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     return (
       <div className="w-full">
-        {label && (
-          <label
-            htmlFor={inputId}
-            className="block text-xs font-mono uppercase tracking-wider font-semibold text-ink mb-1.5"
-          >
-            {label}
-            {props.required && <span className="text-zinc-500 ml-1">*</span>}
-          </label>
-        )}
+        {label && (() => {
+          const isRequired = props.required || label.trim().endsWith('*');
+          const cleanLabel = label.replace(/\s*\*+$/, '');
+          return (
+            <label
+              htmlFor={inputId}
+              className="block text-xs font-mono font-semibold text-ink mb-1.5"
+            >
+              {cleanLabel}
+              {isRequired && <span className="text-red-600 font-bold ml-1">*</span>}
+            </label>
+          );
+        })()}
         <input
           id={inputId}
           ref={ref}
           type={type}
           className={cn(
-            'w-full bg-white text-ink border-hairline rounded-base px-3.5 py-2.5 text-sm transition-colors placeholder:text-zinc-400 focus:border-ink focus:outline-none focus:ring-1 focus:ring-ink disabled:bg-zinc-100 disabled:cursor-not-allowed',
+            'w-full bg-white text-ink border-hairline rounded-full px-4 py-2.5 text-sm transition-colors placeholder:text-zinc-400 focus:border-ink focus:outline-none focus:ring-1 focus:ring-ink disabled:bg-zinc-100 disabled:cursor-not-allowed',
             error && 'border-red-600 focus:border-red-600 focus:ring-red-600',
             className
           )}

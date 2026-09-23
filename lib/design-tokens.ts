@@ -5,18 +5,18 @@
 
 export const palette = {
   bg: '#FFFFFF',
-  surface: '#EDE8DF',
-  surfaceAlt: '#E4DDD1',
+  surface: '#000000',
+  surfaceAlt: '#000000',
   ink: '#111111',
   inkAlt: '#1A1A1A',
   border: '#27272A',
   borderLight: '#D8D3C8',
   muted: '#52525B',
   mutedLight: '#71717A',
-  accentInverted: '#EDE8DF',
-  burgundy: '#6B1D2F',
-  burgundyHover: '#541624',
-  burgundyActive: '#3E0F1A',
+  accentInverted: '#000000',
+  burgundy: '#950606',
+  burgundyHover: '#7B0505',
+  burgundyActive: '#5F0404',
   burgundyLight: '#FDF2F4',
 } as const;
 

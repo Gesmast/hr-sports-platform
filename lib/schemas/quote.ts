@@ -115,6 +115,19 @@ export const garmentSpecSchema = z.object({
   panel_piping: z.string().nullable().optional(),
   logo_application: z.array(z.string()).default([]),
   font_name: z.string().nullable().optional(),
+  // Detailed Manufacturing Specifications
+  shirt_type: z.string().nullable().optional(),
+  neck_style: z.string().nullable().optional(),
+  arm_style: z.string().nullable().optional(),
+  trouser_method: z.string().nullable().optional(),
+  trouser_cut_sew_method: z.string().nullable().optional(),
+  pocket_design: z.string().nullable().optional(),
+  trouser_cargo_pockets: z.string().nullable().optional(),
+  has_back_pockets: z.string().nullable().optional(),
+  back_pocket_type: z.string().nullable().optional(),
+  // Two-Level Fabric Specifications
+  fabric_family: z.string().nullable().optional(),
+  fabric_type: z.string().nullable().optional(),
   mockups: z.object({
     front: z.string().nullable().optional(),
     side: z.string().nullable().optional(),
@@ -131,57 +144,152 @@ export const stepOneBaseSchema = z.object({
   companyName: z
     .string()
     .trim()
-    .min(2, 'Company or organization name must be at least 2 characters')
-    .max(100, 'Company name too long'),
+    .max(100, 'Company name too long')
+    .optional()
+    .default(''),
   contactEmail: z
     .string()
     .trim()
-    .email('Please provide a valid corporate email address'),
+    .email('Please provide a valid email address'),
   contactPhone: z
     .string()
     .trim()
-    .optional(),
+    .optional()
+    .default(''),
   targetDeliveryDate: z
     .string()
-    .min(1, 'Target delivery date or turnaround timeframe is required'),
+    .optional()
+    .default(''),
   // Enhanced OMTEX meta fields
-  order_by: z.string().optional(),
+  order_by: z
+    .string({ required_error: 'Your name is required' })
+    .trim()
+    .min(1, 'Your name is required')
+    .default('Valued Client'),
   designer: z.string().optional(),
   order_date: z.string().optional(),
   dispatch_date: z.string().optional(),
   team_country_name: z.string().optional(),
-  sport: z.string().optional(),
+  country: z.string().optional().default('PK'),
+  lookingFor: z.string().optional().default(''),
+  sport: z.string().optional().default(''),
+  uniform_type: z.string().optional().default(''),
+  inquiry_code: z.string().optional(),
 });
 
-export const stepOneSchema = stepOneBaseSchema;
+export const stepOneSchema = stepOneBaseSchema.extend({
+  order_by: z.string().trim().min(1, 'Your name is required'),
+  lookingFor: z.string().min(1, 'Please select what you are looking for'),
+  country: z.string().optional().default('PK'),
+}).superRefine((data, ctx) => {
+  if (data.lookingFor === 'Custom Sportswear' && (!data.sport || data.sport === '')) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Please select a sport',
+      path: ['sport'],
+    });
+  }
+  if (data.lookingFor === 'Uniform' && (!data.uniform_type || data.uniform_type === '')) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Please select a type of uniform',
+      path: ['uniform_type'],
+    });
+  }
+});
 
 export const stepTwoBaseSchema = z.object({
-  volumeMOQ: z
-    .number({ invalid_type_error: 'Quantity must be a number' })
-    .int('Quantity must be an integer')
-    .min(MOQ_UNITS, `Minimum order quantity is ${MOQ_LABEL}`),
+  volumeMOQ: z.preprocess(
+    (val) => (val === '' || val === null || val === undefined || (typeof val === 'number' && isNaN(val)) ? undefined : Number(val)),
+    z.number({ required_error: `Minimum order quantity is ${MOQ_UNITS} pieces`, invalid_type_error: 'Quantity must be a number' })
+      .int('Quantity must be an integer')
+      .min(MOQ_UNITS, `Minimum order quantity is ${MOQ_UNITS} pieces`)
+  ),
   garmentType: z
     .string()
-    .min(1, 'Please select a garment or apparel category'),
+    .optional()
+    .default('Performance Apparel'),
   materialVariant: z
     .string()
-    .min(1, 'Please specify your target fabric or material blend'),
+    .optional()
+    .default('Custom Fabric'),
   sizeBreakdown: z
     .string()
     .optional(),
   // Enhanced Order Type & Multi-garment fields
-  order_type: z.enum(['uniform', 'individualized']).default('uniform'),
+  kit_selection: z.string().optional(),
+  shirt_type: z.string().optional(),
+  neck_style: z.string().optional(),
+  arm_style: z.string().optional(),
+  trouser_method: z.string().optional(),
+  trouser_cut_sew_method: z.string().optional(),
+  pocket_design: z.string().optional(),
+  trouser_cargo_pockets: z.string().optional(),
+  has_back_pockets: z.string().optional(),
+  back_pocket_type: z.string().optional(),
+  fabric_family: z.string().optional(),
+  fabric_type: z.string().optional(),
+  order_type: z.string().optional(),
   size_chart_standard: z.enum(['mens_export', 'womens_export', 'youth', 'unisex']).default('mens_export'),
   garments: z.array(garmentSpecSchema).optional(),
   roster: z.array(playerRosterRowSchema).optional(),
   blanks_by_size: z.record(z.string(), z.number()).optional(),
+  roster_excel_file: z.string().nullable().optional(),
+  roster_excel_file_name: z.string().nullable().optional(),
 });
 
-export const stepTwoSchema = stepTwoBaseSchema;
+export const stepTwoSchema = stepTwoBaseSchema.superRefine((data, ctx) => {
+  if (!data.kit_selection || data.kit_selection.trim() === '') {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Please select items',
+      path: ['kit_selection'],
+    });
+  }
+  if (!data.order_type || data.order_type.trim() === '') {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Please select order customization',
+      path: ['order_type'],
+    });
+  }
+  if (!data.volumeMOQ || isNaN(Number(data.volumeMOQ)) || Number(data.volumeMOQ) < MOQ_UNITS) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `Minimum order quantity is ${MOQ_UNITS} pieces`,
+      path: ['volumeMOQ'],
+    });
+  }
+  if (data.order_type === 'individualized') {
+    if (!data.roster_excel_file || data.roster_excel_file.trim() === '') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Please upload the completed player Excel sheet (.xlsx / .xls)',
+        path: ['roster_excel_file'],
+      });
+    }
+  }
+  if (!data.fabric_family || data.fabric_family.trim() === '') {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Please select a fabric family',
+      path: ['fabric_family'],
+    });
+  } else if (!data.fabric_type || data.fabric_type.trim() === '') {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Please select a fabric type',
+      path: ['fabric_type'],
+    });
+  }
+});
 
 export const stepThreeBaseSchema = z.object({
   uploadMode: z.enum(['file', 'design-help']),
-  designFiles: z.array(designFileSchema).optional(),
+  has_logo: z.enum(['yes', 'no']).optional(),
+  logo_files: z.array(z.string()).optional(),
+  logo_placement_note: z.string().optional(),
+  designFiles: z.array(z.union([designFileSchema, z.string(), z.record(z.any()), z.any()])).optional(),
   designNotes: z.string().max(3000, 'Notes must be within 3,000 characters').optional(),
   primaryColor: z.string().optional(),
   accentColor: z.string().optional(),
@@ -194,19 +302,22 @@ export const stepThreeBaseSchema = z.object({
 });
 
 export const stepThreeSchema = stepThreeBaseSchema.superRefine((data, ctx) => {
-  if (data.uploadMode === 'design-help') {
-    if (!data.designNotes || data.designNotes.trim().length < 5) {
+  if (data.has_logo === 'yes') {
+    if (!data.logo_files || data.logo_files.length === 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Please provide design instructions or tech requirements (minimum 5 characters)',
-        path: ['designNotes'],
+        message: 'Please upload at least one logo file',
+        path: ['logo_files'],
       });
     }
-  } else if (data.uploadMode === 'file') {
-    if (!data.designFiles || data.designFiles.length === 0) {
+  }
+
+  if (data.uploadMode === 'file' || data.design?.source === 'client_provided') {
+    const hasFiles = (data.designFiles && data.designFiles.length > 0) || (data.design?.uploaded_files && data.design.uploaded_files.length > 0);
+    if (!hasFiles) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Please attach at least one tech pack (.pdf/.ai/.eps) or 3D garment file (.glb/.obj/.zprj)',
+        message: 'Please attach at least one design file or artwork (.pdf/.ai/.eps/.png/.jpg/.psd)',
         path: ['designFiles'],
       });
     }
@@ -224,9 +335,25 @@ export const quoteSchema = z.object({
   order_date: stepOneBaseSchema.shape.order_date,
   dispatch_date: stepOneBaseSchema.shape.dispatch_date,
   team_country_name: stepOneBaseSchema.shape.team_country_name,
+  country: stepOneBaseSchema.shape.country,
+  lookingFor: stepOneBaseSchema.shape.lookingFor,
   sport: stepOneBaseSchema.shape.sport,
+  uniform_type: stepOneBaseSchema.shape.uniform_type,
+  inquiry_code: stepOneBaseSchema.shape.inquiry_code,
 
   // Section 2: Order Type & Specifications
+  kit_selection: stepTwoBaseSchema.shape.kit_selection,
+  shirt_type: stepTwoBaseSchema.shape.shirt_type,
+  neck_style: stepTwoBaseSchema.shape.neck_style,
+  arm_style: stepTwoBaseSchema.shape.arm_style,
+  trouser_method: stepTwoBaseSchema.shape.trouser_method,
+  trouser_cut_sew_method: stepTwoBaseSchema.shape.trouser_cut_sew_method,
+  pocket_design: stepTwoBaseSchema.shape.pocket_design,
+  trouser_cargo_pockets: stepTwoBaseSchema.shape.trouser_cargo_pockets,
+  has_back_pockets: stepTwoBaseSchema.shape.has_back_pockets,
+  back_pocket_type: stepTwoBaseSchema.shape.back_pocket_type,
+  fabric_family: stepTwoBaseSchema.shape.fabric_family,
+  fabric_type: stepTwoBaseSchema.shape.fabric_type,
   order_type: stepTwoBaseSchema.shape.order_type,
   size_chart_standard: stepTwoBaseSchema.shape.size_chart_standard,
   volumeMOQ: stepTwoBaseSchema.shape.volumeMOQ,
@@ -236,9 +363,14 @@ export const quoteSchema = z.object({
   garments: stepTwoBaseSchema.shape.garments,
   roster: stepTwoBaseSchema.shape.roster,
   blanks_by_size: stepTwoBaseSchema.shape.blanks_by_size,
+  roster_excel_file: stepTwoBaseSchema.shape.roster_excel_file,
+  roster_excel_file_name: stepTwoBaseSchema.shape.roster_excel_file_name,
 
   // Section 3: Design & Tech Assets
   uploadMode: stepThreeBaseSchema.shape.uploadMode,
+  has_logo: stepThreeBaseSchema.shape.has_logo,
+  logo_files: stepThreeBaseSchema.shape.logo_files,
+  logo_placement_note: stepThreeBaseSchema.shape.logo_placement_note,
   designFiles: stepThreeBaseSchema.shape.designFiles,
   designNotes: stepThreeBaseSchema.shape.designNotes,
   primaryColor: stepThreeBaseSchema.shape.primaryColor,
@@ -249,19 +381,60 @@ export const quoteSchema = z.object({
   generatedPreviewBackUrl: stepThreeBaseSchema.shape.generatedPreviewBackUrl,
   design: designSourceSchema.optional(),
 }).superRefine((data, ctx) => {
-  if (data.uploadMode === 'design-help') {
-    if (!data.designNotes || data.designNotes.trim().length < 5) {
+  if (data.lookingFor === 'Custom Sportswear' && (!data.sport || data.sport === '')) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Please select a sport',
+      path: ['sport'],
+    });
+  }
+  if (data.lookingFor === 'Uniform' && (!data.uniform_type || data.uniform_type === '')) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Please select a type of uniform',
+      path: ['uniform_type'],
+    });
+  }
+
+  // Section 2: MOQ check
+  if (!data.volumeMOQ || isNaN(Number(data.volumeMOQ)) || Number(data.volumeMOQ) < MOQ_UNITS) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `Minimum order quantity is ${MOQ_UNITS} pieces`,
+      path: ['volumeMOQ'],
+    });
+  }
+
+  // Section 2: Individualized player Excel file check
+  if (data.order_type === 'individualized') {
+    if (!data.roster_excel_file || data.roster_excel_file.trim() === '') {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Please provide design instructions or tech requirements (minimum 5 characters)',
-        path: ['designNotes'],
+        message: 'Please upload the completed player Excel sheet (.xlsx / .xls)',
+        path: ['roster_excel_file'],
       });
     }
-  } else if (data.uploadMode === 'file') {
-    if (!data.designFiles || data.designFiles.length === 0) {
+  }
+
+  // Section 3: Logo check (if user chooses "Yes, I have a logo", logo file upload is REQUIRED)
+  if (data.has_logo === 'yes') {
+    if (!data.logo_files || data.logo_files.length === 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Please attach at least one tech pack (.pdf/.ai/.eps) or 3D garment file',
+        message: 'Please upload at least one logo file',
+        path: ['logo_files'],
+      });
+    }
+  }
+
+  // Section 3: Design check (if user chooses "I have a design", design file upload is REQUIRED)
+  if (data.uploadMode === 'file' || data.design?.source === 'client_provided') {
+    const hasFiles = (data.designFiles && data.designFiles.length > 0) ||
+                    (data.design?.uploaded_files && data.design.uploaded_files.length > 0);
+    if (!hasFiles) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Please upload at least one design file or artwork',
         path: ['designFiles'],
       });
     }

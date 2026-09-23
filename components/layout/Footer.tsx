@@ -17,7 +17,7 @@ export const Footer: React.FC = () => {
     const validation = newsletterSchema.safeParse({ email });
     if (!validation.success) {
       setStatus('error');
-      setMessage('Please enter a valid corporate email address.');
+      setMessage('Please enter a valid email address.');
       return;
     }
 

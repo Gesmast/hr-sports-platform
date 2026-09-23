@@ -140,7 +140,8 @@ export interface DesignFile {
 }
 
 export interface QuoteInquiryPayload {
-  companyName: string;
+  companyName?: string;
+  order_by?: string;
   contactEmail: string;
   contactPhone?: string;
   targetDeliveryDate: string;

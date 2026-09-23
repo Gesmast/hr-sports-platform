@@ -57,4 +57,4 @@ export const SIZE_CHART_PRESETS: Record<SizeChartStandard, { label: string; size
   },
 };
 
-export const DEFAULT_SIZES_ORDER = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL'];
+export const DEFAULT_SIZES_ORDER = ['XS', 'S', 'M', 'L', 'XL', '2XL'];

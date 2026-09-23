@@ -151,7 +151,7 @@ export const db = {
       id: `ord-${Date.now()}`,
       referenceNumber: refId,
       clientEmail: quote.contactEmail,
-      companyName: quote.companyName,
+      companyName: quote.companyName || quote.order_by || 'Client Order',
       garmentType: quote.garmentType,
       quantity: quote.volumeMOQ,
       material: quote.materialVariant,
@@ -174,8 +174,8 @@ export const db = {
     mockOrders.unshift(newOrder);
     return newOrder;
   },
-  saveQuoteInquiry: async (payload: QuoteInquiryPayload) => {
-    const refId = generateReferenceId();
+  saveQuoteInquiry: async (payload: QuoteInquiryPayload & { inquiry_code?: string; r2_folder?: string; r2_files?: Record<string, string> }) => {
+    const refId = payload.inquiry_code || generateReferenceId();
     const entry = {
       ...payload,
       id: `inq-${Date.now()}`,
