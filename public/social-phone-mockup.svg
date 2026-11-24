@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 443 626" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <!-- Screen Cutout Bounds (iPhone screen: x:129, y:117, w:184, h:390, rx:26) -->
+    <clipPath id="iphone-screen-area">
+      <rect x="129" y="117" width="184" height="390" rx="26" ry="26" />
+    </clipPath>
+
+    <!-- Studio Shadow for realism against pure white background -->
+    <filter id="soft-studio-shadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#000000" flood-opacity="0.10" />
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.05" />
+    </filter>
+  </defs>
+
+  <!-- Clean Pure White Background -->
+  <rect width="443" height="626" fill="#FFFFFF" />
+
+  <!-- High-Resolution Hands & Phone Frame -->
+  <g filter="url(#soft-studio-shadow)">
+    <image href="/social-phone-mockup.png" x="0" y="0" width="443" height="626" preserveAspectRatio="xMidYMid meet" />
+  </g>
+</svg>

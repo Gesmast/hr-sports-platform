@@ -1,21 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@500;600;700;800&family=Cinzel:wght@800;900&family=Google+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,800;0,900;1,800;1,900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
   --color-bg: #FFFFFF;
-  --color-surface: #000000;
-  --color-surface-alt: #000000;
-  --color-ink: #111111;
-  --color-ink-alt: #1A1A1A;
-  --color-border: #27272A;
-  --color-border-light: #D8D3C8;
+  --color-surface: #F4F4F5;
+  --color-surface-alt: #E4E4E7;
+  --color-ink: #000000;
+  --color-ink-alt: #111111;
+  --color-border: #E4E4E7;
+  --color-border-light: #F4F4F5;
   --color-muted: #52525B;
   --color-muted-light: #71717A;
-  --color-burgundy: #950606;
-  --color-burgundy-hover: #7b0505;
-  --color-burgundy-active: #5f0404;
-  --color-burgundy-light: #FDF2F4;
+  --color-burgundy: #000000;
+  --color-burgundy-hover: #18181B;
+  --color-burgundy-active: #27272A;
+  --color-burgundy-light: #F4F4F5;
   --radius-base: 4px;
 }
 
@@ -57,6 +59,29 @@ body {
 .tabular-numbers {
   font-variant-numeric: tabular-nums;
 }
+
+/* Urdu Typography Optimization: Baloo Bhaijaan 2 Bold & Legible (+20% scale everywhere) */
+html[lang="ur"] {
+  font-size: 120% !important;
+}
+
+.font-urdu, [lang="ur"] {
+  font-family: 'Baloo Bhaijaan 2', system-ui, -apple-system, sans-serif !important;
+  line-height: 1.55 !important;
+  letter-spacing: 0 !important;
+  font-weight: 600;
+  text-rendering: optimizeLegibility;
+}
+
+html:not([lang="ur"]) .font-urdu {
+  font-size: 1.2em !important;
+}
+
+html[lang="ur"] .text-\[10px\] { font-size: 12px !important; }
+html[lang="ur"] .text-\[11px\] { font-size: 13.2px !important; }
+html[lang="ur"] .text-\[12px\] { font-size: 14.4px !important; }
+html[lang="ur"] .text-\[13px\] { font-size: 15.6px !important; }
+html[lang="ur"] .text-\[14px\] { font-size: 16.8px !important; }
 
 /* Focus styling with charcoal outline */
 a:focus-visible,
@@ -106,3 +131,47 @@ textarea:focus-visible {
 .animate-subtle-pulse {
   animation: subtle-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+/* Infinite Marquee Animation for Trusted By Strip */
+@keyframes marquee-scroll {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-marquee-strip {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 32s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee-strip:hover {
+  animation-play-state: paused;
+}
+
+/* Infinite Marquee Animation for Shopify-Style Announcement Bar & Strips */
+@keyframes marquee {
+  0% {
+    transform: translate3d(0%, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 25s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+

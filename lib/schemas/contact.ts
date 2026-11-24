@@ -25,6 +25,8 @@ export const contactSchema = z.object({
     .trim()
     .min(5, 'Comment / message must be at least 5 characters')
     .max(4000, 'Message is too long'),
+  // Honeypot field for bot protection (should always be empty when submitted by humans)
+  honeypot: z.string().optional(),
 });
 
 export type ContactSchemaType = z.infer<typeof contactSchema>;

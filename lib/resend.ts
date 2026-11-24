@@ -32,20 +32,20 @@ export const emailService = {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: `HR Sports Manufacturing <${fromEmail}>`,
+          from: `HR Sports <${fromEmail}>`,
           to: [payload.contactEmail],
-          subject: `Quote Intake Confirmed — Ref #${referenceId} | HR Sports OEM`,
+          subject: `Quote Intake Confirmed — Ref #${referenceId} | HR Sports`,
           html: `
             <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 24px; color: #111111; background-color: #ffffff; border: 1px solid #27272A;">
               <div style="border-bottom: 2px solid #111111; padding-bottom: 16px; margin-bottom: 24px;">
                 <h1 style="font-size: 22px; font-weight: 800; letter-spacing: -0.02em; margin: 0;">HR SPORTS</h1>
-                <p style="font-size: 12px; color: #52525B; margin: 4px 0 0 0; text-transform: uppercase; letter-spacing: 0.05em;">OEM & Technical Apparel Manufacturing</p>
+                <p style="font-size: 12px; color: #52525B; margin: 4px 0 0 0; text-transform: uppercase; letter-spacing: 0.05em;">Custom Sports Apparel</p>
               </div>
 
-              <p style="font-size: 15px; line-height: 1.6; margin-bottom: 16px;">Dear <strong>${payload.companyName || payload.order_by || 'Valued'}</strong> Team,</p>
+              <p style="font-size: 15px; line-height: 1.6; margin-bottom: 16px;">Hello <strong>${payload.companyName || payload.order_by || 'Valued'}</strong> team,</p>
               
               <p style="font-size: 14px; line-height: 1.6; color: #52525B; margin-bottom: 24px;">
-                We have received your custom manufacturing inquiry. Your production inquiry has been assigned reference number <strong>${referenceId}</strong> and forwarded to our master textile engineering and pattern team.
+                We have received your custom sportswear inquiry. Your inquiry reference number is <strong>${referenceId}</strong>. Our design and order team has begun reviewing your details.
               </p>
 
               <div style="background-color: #F5F5F0; border: 1px solid #E4E4E7; border-radius: 4px; padding: 20px; margin-bottom: 24px;">

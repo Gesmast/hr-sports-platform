@@ -1,8 +1,6 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
-import { motion } from 'framer-motion';
 
 interface CountryItem {
   slug: string;
@@ -272,39 +270,46 @@ const renderCircularFlag = (slug: string) => {
   }
 };
 
-export const ShipWorldwideGrid: React.FC = () => {
+export interface ShipWorldwideGridProps {
+  heading?: string;
+  subheading?: string;
+}
+
+export const ShipWorldwideGrid: React.FC<ShipWorldwideGridProps> = ({
+  heading = 'We Ship Everywhere.',
+  subheading = 'Custom sportswear, made for you and delivered straight to your door with fast, tracked delivery.',
+}) => {
   return (
     <section className="py-12 md:py-16 bg-surface border-b border-hairline border-border">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Centered Headline without eyebrow */}
         <div className="text-center max-w-2xl mx-auto mb-10 md:mb-12">
           <h2 className="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-ink leading-tight">
-            We Ship Everywhere.
+            {heading}
           </h2>
           <div className="w-12 h-[2px] bg-ink mx-auto mt-3 mb-3" />
           <p className="text-xs sm:text-sm text-muted">
-            Custom sportswear, made for you and delivered straight to your door with fast, tracked delivery.
+            {subheading}
           </p>
         </div>
 
         {/* 5 + 4 Centered Flag Cards Grid */}
         <div className="flex flex-wrap justify-center gap-3 sm:gap-5 max-w-5xl mx-auto">
           {countryList.map((country) => (
-            <Link
+            <div
               key={country.slug}
-              href={`/manufacturers/${country.slug}`}
-              className="group flex flex-col items-center justify-center w-[130px] sm:w-[155px] p-4 sm:p-5 bg-white hover:bg-zinc-50 border-hairline border-border rounded-base transition-all duration-150 text-center shadow-xs hover:border-ink hover:translate-y-[-2px] cursor-pointer"
+              className="flex flex-col items-center justify-center w-[130px] sm:w-[155px] p-4 sm:p-5 bg-white border-hairline border-border rounded-base text-center shadow-xs select-none"
             >
               {/* Circular Flag */}
-              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden shadow-sm transition-transform duration-200 group-hover:scale-105 mb-3">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden shadow-sm mb-3">
                 {renderCircularFlag(country.slug)}
               </div>
 
               {/* Country Name */}
-              <span className="text-xs sm:text-sm font-extrabold font-mono tracking-wider text-ink group-hover:underline">
+              <span className="text-xs sm:text-sm font-extrabold font-mono tracking-wider text-ink">
                 {country.name}
               </span>
-            </Link>
+            </div>
           ))}
         </div>
       </div>

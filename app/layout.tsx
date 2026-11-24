@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { AnnouncementBar } from '@/components/layout/AnnouncementBar';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { AuthProvider } from '@/components/auth/AuthProvider';
-import { WhatsAppWidget } from '@/components/shared/WhatsAppWidget';
+import { StorefrontPreviewBridge } from '@/components/shared/StorefrontPreviewBridge';
 import { SITE_CONFIG } from '@/lib/constants';
 
 export const metadata: Metadata = {
@@ -75,20 +75,19 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en" suppressHydrationWarning className="scroll-smooth">
       <head>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className="min-h-screen flex flex-col bg-white text-ink antialiased">
-        <AuthProvider>
-          <Header />
-          <div className="flex-1">{children}</div>
-          <Footer />
-          <WhatsAppWidget />
-        </AuthProvider>
+      <body suppressHydrationWarning className="min-h-screen flex flex-col bg-white text-ink antialiased">
+        <StorefrontPreviewBridge />
+        <AnnouncementBar />
+        <Header />
+        <div className="flex-1">{children}</div>
+        <Footer />
       </body>
     </html>
   );

@@ -1,10 +1,5 @@
 import { Metadata } from 'next';
-import { Hero } from '@/components/home/Hero';
-import { ChooseYourStyle } from '@/components/home/ChooseYourStyle';
-import { HowWeWork } from '@/components/home/HowWeWork';
-import { WhyChooseHRSports } from '@/components/home/WhyChooseHRSports';
-import { ShipWorldwideGrid } from '@/components/home/ShipWorldwideGrid';
-import { HomeFAQSection } from '@/components/home/HomeFAQSection';
+import { DynamicHomeRenderer } from '@/components/home/DynamicHomeRenderer';
 import { SITE_CONFIG } from '@/lib/constants';
 
 export const metadata: Metadata = {
@@ -21,12 +16,7 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <main className="flex flex-col min-h-screen">
-      <Hero />
-      <ChooseYourStyle />
-      <HowWeWork />
-      <WhyChooseHRSports />
-      <ShipWorldwideGrid />
-      <HomeFAQSection />
+      <DynamicHomeRenderer />
     </main>
   );
 }

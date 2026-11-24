@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useId, useRef } from 'react';
+import React, { useState, useEffect, useId, useRef } from 'react';
+import Link from 'next/link';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -9,6 +10,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Download,
+  Copy,
   Palette,
   Plus,
   Trash2,
@@ -32,6 +34,7 @@ import { detectCountryFromTimezone } from '@/lib/phone';
 import { Button } from '@/components/shared/Button';
 import { Input } from '@/components/shared/Input';
 import { BorderCard } from '@/components/shared/BorderCard';
+import { createClient } from '@/lib/supabase/client';
 import { DesignUploadZone } from './DesignUploadZone';
 import { SizeChartModal } from './SizeChartModal';
 import { RegionFlagIcon } from './RegionFlags';
@@ -467,6 +470,8 @@ export const InquiryForm: React.FC<InquiryFormProps> = ({
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
   const [activeGarmentTab, setActiveGarmentTab] = useState(0);
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [copiedRef, setCopiedRef] = useState(false);
 
   const defaultTopGarment: GarmentSpecType = {
     garment_type: 'top',
@@ -584,6 +589,10 @@ export const InquiryForm: React.FC<InquiryFormProps> = ({
       logo_placement_note: '',
       designFiles: [],
       designNotes: '',
+      top_primary_color: '',
+      top_secondary_color: '',
+      bottom_primary_color: '',
+      bottom_secondary_color: '',
       primaryColor: '#FAF6EA',
       accentColor: '#FFFFFF',
       garments: [],
@@ -609,6 +618,32 @@ export const InquiryForm: React.FC<InquiryFormProps> = ({
     },
     mode: 'onChange',
   });
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        setCurrentUser(user);
+        if (!getValues('contactEmail') && user.email) {
+          setValue('contactEmail', user.email);
+        }
+        if (!getValues('order_by') && user.user_metadata?.full_name) {
+          setValue('order_by', user.user_metadata.full_name);
+        }
+        if (!getValues('companyName') && user.user_metadata?.company_name) {
+          setValue('companyName', user.user_metadata.company_name);
+        }
+      }
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setCurrentUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [setValue, getValues]);
 
   const orderType = watch('order_type');
   const sizeStandard = watch('size_chart_standard') as SizeChartStandard;
@@ -670,6 +705,12 @@ export const InquiryForm: React.FC<InquiryFormProps> = ({
   const [logoUploadError, setLogoUploadError] = useState<string | null>(null);
   const [referenceFilesList, setReferenceFilesList] = useState<Array<{ name: string; sizeMb: string; dataUrl: string }>>([]);
   const [referenceUploadError, setReferenceUploadError] = useState<string | null>(null);
+
+  // Step 3: Garment Item Colours (Primary required, Secondary optional)
+  const [topPrimaryColor, setTopPrimaryColor] = useState<string>('');
+  const [topSecondaryColor, setTopSecondaryColor] = useState<string>('');
+  const [bottomPrimaryColor, setBottomPrimaryColor] = useState<string>('');
+  const [bottomSecondaryColor, setBottomSecondaryColor] = useState<string>('');
 
   // Player Customization Excel Sheet state
   const [rosterExcelFileName, setRosterExcelFileName] = useState<string | null>(null);
@@ -812,6 +853,9 @@ export const InquiryForm: React.FC<InquiryFormProps> = ({
       ? `Merch Bottom${trouserMethod ? ` (${trouserMethod})` : ''}`
       : `${selectedSport || 'Custom'} Trouser / Shorts${trouserMethod ? ` (${trouserMethod})` : ''}`;
 
+    const topColorVal = topPrimaryColor ? `${topPrimaryColor}${topSecondaryColor ? ' / ' + topSecondaryColor : ''}` : (shirtType || '-');
+    const bottomColorVal = bottomPrimaryColor ? `${bottomPrimaryColor}${bottomSecondaryColor ? ' / ' + bottomSecondaryColor : ''}` : (trouserMethod || '-');
+
     const topGarment: GarmentSpecType = {
       garment_type: 'top',
       type_name: topName,
@@ -823,7 +867,7 @@ export const InquiryForm: React.FC<InquiryFormProps> = ({
       fabric_name: fullFabricName || 'Custom Performance Fabric',
       fabric_family: fabricFamily || undefined,
       fabric_type: fabricType || undefined,
-      colour_value: shirtType || '-',
+      colour_value: topColorVal,
       colour_mode: shirtType.toLowerCase().includes('sublimation') ? 'sublimation' : 'solid',
       panel_piping: '-',
       button_type: neckStyle.includes('Polo') ? 'Kaaj Buttons' : neckStyle.includes('zip') ? 'Zipper' : 'None',
@@ -844,7 +888,7 @@ export const InquiryForm: React.FC<InquiryFormProps> = ({
       fabric_name: fullFabricName || 'Custom Performance Fabric',
       fabric_family: fabricFamily || undefined,
       fabric_type: fabricType || undefined,
-      colour_value: trouserMethod || '-',
+      colour_value: bottomColorVal,
       colour_mode: trouserMethod === 'Sublimation' ? 'sublimation' : 'solid',
       panel_piping: trouserMethod === 'Cut & Sew' ? trouserCutSewMethod || '-' : '-',
       logo_application: ['Embroidery'],
@@ -873,6 +917,10 @@ export const InquiryForm: React.FC<InquiryFormProps> = ({
     setValue('trouser_cargo_pockets', uniformCargoPockets, { shouldDirty: true });
     setValue('has_back_pockets', hasBackPockets, { shouldDirty: true });
     setValue('back_pocket_type', backPocketType, { shouldDirty: true });
+    setValue('top_primary_color', topPrimaryColor, { shouldDirty: true });
+    setValue('top_secondary_color', topSecondaryColor, { shouldDirty: true });
+    setValue('bottom_primary_color', bottomPrimaryColor, { shouldDirty: true });
+    setValue('bottom_secondary_color', bottomSecondaryColor, { shouldDirty: true });
 
     setValue(
       'garmentType',
@@ -898,6 +946,10 @@ export const InquiryForm: React.FC<InquiryFormProps> = ({
     backPocketType,
     lookingFor,
     selectedSport,
+    topPrimaryColor,
+    topSecondaryColor,
+    bottomPrimaryColor,
+    bottomSecondaryColor,
     setValue,
     watch,
   ]);
@@ -1380,6 +1432,150 @@ export const InquiryForm: React.FC<InquiryFormProps> = ({
     updateLogoSlot(garmentIdx, slotId, { image_url: dataUrl, flag_auto: true, height_in: 2.5, width_in: 3.5 });
   };
 
+  // Reusable Item-Separated Garment Colours Sub-Component for Step 3
+  const renderGarmentColoursSection = () => {
+    const isTopSelected = kitSelection === 'shirt_only' || kitSelection === 'full_kit' || !kitSelection;
+    const isBottomSelected = kitSelection === 'trouser_only' || kitSelection === 'full_kit';
+
+    const topLabel = 'Top Colours';
+    const bottomLabel = 'Bottom Colours';
+
+    return (
+      <div className="space-y-4 pt-3 border-t border-zinc-100">
+        <div>
+          <label className="block text-xs font-mono uppercase font-bold tracking-wider text-ink">
+            Garment Colours
+          </label>
+          <p className="text-[11px] font-mono text-muted mt-0.5">
+            Specify primary (required) and secondary (optional) colours for your selected items.
+          </p>
+        </div>
+
+        {/* TOP / SHIRT COLOURS */}
+        {isTopSelected && (
+          <div className="p-4 bg-zinc-50 border border-zinc-200/90 rounded-xl space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-burgundy shadow-2xs"></span>
+                <span className="text-xs font-mono font-bold text-ink uppercase tracking-wider">
+                  {topLabel}
+                </span>
+              </div>
+              <span className="text-[10px] font-mono text-muted uppercase tracking-wider">Upper Body</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              {/* Top Primary Colour (REQUIRED) */}
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-mono uppercase font-bold tracking-wider text-ink whitespace-nowrap">
+                  Primary Colour <span className="text-burgundy font-bold">*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Navy Blue, Black, #0F172A..."
+                  value={topPrimaryColor}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setTopPrimaryColor(val);
+                    setValue('top_primary_color', val, { shouldDirty: true, shouldValidate: true });
+                    if (val.trim()) clearErrors('top_primary_color');
+                  }}
+                  className={`w-full h-[42px] bg-white text-ink border rounded-base px-3.5 text-sm focus:outline-none focus:ring-1 focus:ring-burgundy transition-all placeholder:text-muted/60 ${
+                    errors.top_primary_color ? 'border-red-500 ring-1 ring-red-500/20' : 'border-zinc-200'
+                  }`}
+                />
+                {errors.top_primary_color && (
+                  <p className="text-[11px] text-red-600 font-medium">
+                    {errors.top_primary_color.message as string}
+                  </p>
+                )}
+              </div>
+
+              {/* Top Secondary Colour (OPTIONAL) */}
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-mono uppercase font-bold tracking-wider text-ink whitespace-nowrap">
+                  Secondary Colour <span className="text-muted font-normal text-[10px] lowercase">(optional)</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. White, Gold, Red (optional)..."
+                  value={topSecondaryColor}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setTopSecondaryColor(val);
+                    setValue('top_secondary_color', val, { shouldDirty: true });
+                  }}
+                  className="w-full h-[42px] bg-white text-ink border border-zinc-200 rounded-base px-3.5 text-sm focus:outline-none focus:ring-1 focus:ring-burgundy transition-all placeholder:text-muted/60"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* BOTTOM / TROUSER COLOURS */}
+        {isBottomSelected && (
+          <div className="p-4 bg-zinc-50 border border-zinc-200/90 rounded-xl space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-burgundy shadow-2xs"></span>
+                <span className="text-xs font-mono font-bold text-ink uppercase tracking-wider">
+                  {bottomLabel}
+                </span>
+              </div>
+              <span className="text-[10px] font-mono text-muted uppercase tracking-wider">Lower Body</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              {/* Bottom Primary Colour (REQUIRED) */}
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-mono uppercase font-bold tracking-wider text-ink whitespace-nowrap">
+                  Primary Colour <span className="text-burgundy font-bold">*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Charcoal Grey, Black, White..."
+                  value={bottomPrimaryColor}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setBottomPrimaryColor(val);
+                    setValue('bottom_primary_color', val, { shouldDirty: true, shouldValidate: true });
+                    if (val.trim()) clearErrors('bottom_primary_color');
+                  }}
+                  className={`w-full h-[42px] bg-white text-ink border rounded-base px-3.5 text-sm focus:outline-none focus:ring-1 focus:ring-burgundy transition-all placeholder:text-muted/60 ${
+                    errors.bottom_primary_color ? 'border-red-500 ring-1 ring-red-500/20' : 'border-zinc-200'
+                  }`}
+                />
+                {errors.bottom_primary_color && (
+                  <p className="text-[11px] text-red-600 font-medium">
+                    {errors.bottom_primary_color.message as string}
+                  </p>
+                )}
+              </div>
+
+              {/* Bottom Secondary Colour (OPTIONAL) */}
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-mono uppercase font-bold tracking-wider text-ink whitespace-nowrap">
+                  Secondary Colour <span className="text-muted font-normal text-[10px] lowercase">(optional)</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Red, Neon Yellow (optional)..."
+                  value={bottomSecondaryColor}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setBottomSecondaryColor(val);
+                    setValue('bottom_secondary_color', val, { shouldDirty: true });
+                  }}
+                  className="w-full h-[42px] bg-white text-ink border border-zinc-200 rounded-base px-3.5 text-sm focus:outline-none focus:ring-1 focus:ring-burgundy transition-all placeholder:text-muted/60"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const validateStep2 = async (): Promise<boolean> => {
     let valid = true;
 
@@ -1488,12 +1684,30 @@ export const InquiryForm: React.FC<InquiryFormProps> = ({
         clearErrors('designFiles');
       }
     } else if (designChoice === 'requested_from_team') {
-      const notes = getValues('designNotes');
-      if (!notes || notes.trim().length < 3) {
-        setError('designNotes', { message: 'Please provide design instructions or notes for our team' });
+      clearErrors('designNotes');
+    }
+
+    // 3. Garment Colours Check (Primary colour is required, separated by Top and Bottom)
+    const isTopActive = kitSelection === 'shirt_only' || kitSelection === 'full_kit' || !kitSelection;
+    const isBottomActive = kitSelection === 'trouser_only' || kitSelection === 'full_kit';
+
+    if (isTopActive) {
+      const topCol = (getValues('top_primary_color') || topPrimaryColor || '').trim();
+      if (!topCol) {
+        setError('top_primary_color', { message: 'Top primary colour is required' });
         valid = false;
       } else {
-        clearErrors('designNotes');
+        clearErrors('top_primary_color');
+      }
+    }
+
+    if (isBottomActive) {
+      const botCol = (getValues('bottom_primary_color') || bottomPrimaryColor || '').trim();
+      if (!botCol) {
+        setError('bottom_primary_color', { message: 'Bottom primary colour is required' });
+        valid = false;
+      } else {
+        clearErrors('bottom_primary_color');
       }
     }
 
@@ -1600,51 +1814,149 @@ export const InquiryForm: React.FC<InquiryFormProps> = ({
     }
   };
 
-  // Step 4: Success Confirmation Screen (Centered Note & PDF Download)
+  // Step 4: Success Confirmation Screen (Polished White & Red Aesthetic, Inquiry Number, PDF Download & Auth Flow)
   if (currentStep === 4 && referenceId) {
+    const contactEmail = getValues('contactEmail');
+
     return (
-      <div className="min-h-[500px] flex items-center justify-center py-6 px-4 animate-in fade-in duration-300">
-        <BorderCard variant="surface" className="w-full max-w-xl mx-auto p-8 sm:p-12 text-center space-y-6 shadow-2xl border-border bg-surface">
-          <div className="w-16 h-16 bg-burgundy text-white rounded-full mx-auto flex items-center justify-center shadow-lg ring-4 ring-burgundy/20">
+      <div className="min-h-[520px] flex items-center justify-center py-8 px-4 animate-in fade-in duration-300">
+        <div className="w-full max-w-2xl bg-white border border-gray-200 rounded-2xl p-6 sm:p-10 text-center shadow-xl space-y-6">
+          {/* Top Check Badge */}
+          <div className="w-16 h-16 bg-burgundy text-white rounded-full mx-auto flex items-center justify-center shadow-md ring-8 ring-red-50">
             <CheckCircle2 className="w-8 h-8 stroke-[2.5]" />
           </div>
 
+          {/* Heading Section */}
           <div className="space-y-2">
-            <div className="text-xs font-mono uppercase tracking-widest text-burgundy font-bold">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 border border-red-200 text-burgundy text-xs font-mono font-bold tracking-wider uppercase">
               Inquiry Submitted Successfully
             </div>
-            <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            <h3 className="text-2xl sm:text-3xl font-extrabold text-ink tracking-tight">
               Thank You for Your Inquiry
             </h3>
-            <p className="text-sm text-zinc-300 max-w-md mx-auto leading-relaxed pt-1">
-              Your inquiry has been logged in our system. Our manufacturing and CAD engineering team will review your specifications and contact you shortly.
+            <p className="text-sm text-muted max-w-lg mx-auto leading-relaxed">
+              Your manufacturing specifications have been registered with our production department. Our CAD patternmakers and costing specialists are reviewing your design and sizing requirements.
             </p>
           </div>
 
-          {/* Centered Note with Inquiry Number */}
-          <div className="p-5 bg-zinc-900/90 border border-zinc-700/80 rounded-xl max-w-sm mx-auto shadow-inner space-y-1.5">
-            <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400 block font-semibold">
-              Your Inquiry Number
+          {/* Inquiry Reference Number Card */}
+          <div className="p-6 bg-slate-50 border border-slate-200 rounded-2xl max-w-md mx-auto shadow-xs space-y-3 text-center">
+            <span className="text-[11px] font-mono uppercase tracking-widest text-slate-500 block font-bold">
+              Your Inquiry Reference Number
             </span>
-            <span className="text-2xl sm:text-3xl font-mono font-black text-white tracking-wider block text-burgundy">
-              {referenceId}
-            </span>
-            <span className="text-[11px] font-mono text-zinc-400 block pt-1">
-              Keep this inquiry number for reference when contacting our team.
-            </span>
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-3xl sm:text-4xl font-mono font-black text-slate-900 tracking-wider select-all">
+                {referenceId}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(referenceId);
+                  setCopiedRef(true);
+                  setTimeout(() => setCopiedRef(false), 2000);
+                }}
+                title="Copy reference number"
+                className="p-1.5 rounded-lg hover:bg-slate-200 text-slate-700 transition cursor-pointer"
+              >
+                {copiedRef ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+              </button>
+            </div>
+
+            {/* Guaranteed 24-Hour Contact Promise */}
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-blue-50 border border-blue-200/80 text-blue-700 text-xs font-semibold">
+              <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+              <span>We will contact you within 24 hours</span>
+            </div>
+
+            <p className="text-xs text-slate-500 block pt-1">
+              Save this reference number. Our team will review your order details and reach out within 24 hours.
+            </p>
           </div>
 
-          {/* Buttons: Download PDF Summary & Submit Another */}
-          <div className="pt-3 flex flex-col sm:flex-row items-center justify-center gap-3">
+          {/* Dynamic Authentication Context Card */}
+          {currentUser ? (
+            /* Logged-In User Experience */
+            <div className="p-5 rounded-xl bg-gray-50/80 border border-gray-200 text-left flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-emerald-100 text-emerald-800">
+                    Account Synced
+                  </span>
+                  <span className="text-xs font-mono text-muted truncate max-w-[220px]">
+                    {currentUser.email}
+                  </span>
+                </div>
+                <h4 className="text-sm font-bold text-ink">Inquiry Tracked in Your Portal</h4>
+                <p className="text-xs text-muted leading-relaxed">
+                  This inquiry has been linked directly to your client account. You can review quote releases, message our engineering desk, and convert quotes into active production orders.
+                </p>
+              </div>
+              <Link href="/portal/inquiries" className="shrink-0 w-full sm:w-auto">
+                <Button
+                  variant="primary"
+                  size="md"
+                  className="w-full sm:w-auto bg-burgundy hover:bg-burgundy-hover font-mono font-bold text-xs gap-1.5 shadow-sm whitespace-nowrap cursor-pointer"
+                >
+                  Go to Client Portal
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            /* Guest / Logged-Out Experience: Prompt to Sign Up & Track */
+            <div className="p-5 rounded-xl bg-red-50/60 border border-red-200 text-left space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-burgundy animate-pulse" />
+                  <span className="text-xs font-mono font-bold uppercase tracking-wider text-burgundy">
+                    Track Inquiry in Real-Time
+                  </span>
+                </div>
+                <span className="text-[10px] font-mono text-muted font-medium">Free Client Account</span>
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-ink">
+                  Create an Account to Track Quotes & Production
+                </h4>
+                <p className="text-xs text-muted leading-relaxed mt-1">
+                  Sign up with <span className="font-semibold text-ink font-mono">{contactEmail || 'your email'}</span> to instantly link this inquiry to your portal. Review manufacturer quotes, chat directly with production managers, and approve samples.
+                </p>
+              </div>
+              <div className="pt-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <Link
+                  href={`/signup?email=${encodeURIComponent(contactEmail || '')}&redirectTo=${encodeURIComponent('/portal/inquiries')}`}
+                  className="w-full sm:w-auto"
+                >
+                  <Button
+                    variant="primary"
+                    size="md"
+                    className="w-full sm:w-auto bg-burgundy hover:bg-burgundy-hover font-mono font-bold text-xs gap-1.5 shadow-sm whitespace-nowrap cursor-pointer"
+                  >
+                    Sign Up & Track Inquiry
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Button>
+                </Link>
+                <Link
+                  href={`/login?redirectTo=${encodeURIComponent('/portal/inquiries')}`}
+                  className="text-xs text-center text-muted hover:text-burgundy font-semibold underline underline-offset-2 transition py-1"
+                >
+                  Already have an account? Sign In
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {/* Action Row: Download PDF & Submit Another */}
+          <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3 border-t border-gray-100">
             <Button
-              variant="primary"
+              variant="outline"
               size="lg"
               isLoading={isDownloadingPdf}
               onClick={handleDownloadPdf}
-              className="gap-2 w-full sm:w-auto font-mono font-bold shadow-md cursor-pointer whitespace-nowrap"
+              className="gap-2 w-full sm:w-auto font-mono font-bold border-gray-300 text-ink hover:border-burgundy hover:text-burgundy hover:bg-red-50/50 shadow-xs cursor-pointer whitespace-nowrap"
             >
-              <Download className="w-4 h-4" />
-              Download PDF Summary
+              <Download className="w-4 h-4 text-burgundy" />
+              Download Spec PDF
             </Button>
 
             <Button
@@ -1654,12 +1966,12 @@ export const InquiryForm: React.FC<InquiryFormProps> = ({
                 setCurrentStep(1);
                 setReferenceId(null);
               }}
-              className="w-full sm:w-auto text-zinc-300 hover:text-white border-zinc-700 hover:border-zinc-500 cursor-pointer whitespace-nowrap"
+              className="w-full sm:w-auto text-muted hover:text-ink border-gray-200 hover:border-gray-300 cursor-pointer whitespace-nowrap"
             >
               Submit Another Inquiry
             </Button>
           </div>
-        </BorderCard>
+        </div>
       </div>
     );
   }
@@ -3391,6 +3703,9 @@ export const InquiryForm: React.FC<InquiryFormProps> = ({
                       )}
                     </div>
 
+                    {/* Garment Colours Field (Separated by Top and Bottom) */}
+                    {renderGarmentColoursSection()}
+
                     {/* Notes Field */}
                     <div className="space-y-2 pt-3 border-t border-zinc-100">
                       <label className="block text-xs font-mono uppercase font-bold tracking-wider text-ink whitespace-nowrap">
@@ -3488,6 +3803,9 @@ export const InquiryForm: React.FC<InquiryFormProps> = ({
                         </div>
                       )}
                     </div>
+
+                    {/* Garment Colours Field (Separated by Top and Bottom) */}
+                    {renderGarmentColoursSection()}
 
                     {/* Creative Notes Field */}
                     <div className="space-y-2 pt-3 border-t border-zinc-100">

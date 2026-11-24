@@ -39,9 +39,12 @@ export interface StyleProduct {
   moq?: number;
 }
 
+export type MainCategoryType = 'custom-sportswear' | 'uniforms';
+
 export interface StyleCategory {
   id: string;
   slug: string;
+  mainCategory?: MainCategoryType;
   name: string;
   tagline: string;
   description: string;
@@ -125,9 +128,11 @@ export interface Country {
 
 export interface FAQItem {
   id: string;
-  category: 'ordering' | 'design' | 'production' | 'shipping' | 'payment';
+  category: 'ordering' | 'design' | 'production' | 'shipping' | 'payment' | 'policies';
   question: string;
   answer: string;
+  keywords?: string[];
+  tags?: string[];
 }
 
 export interface DesignFile {

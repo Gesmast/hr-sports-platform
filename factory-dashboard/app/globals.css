@@ -1,0 +1,263 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@500;600;700;800&family=Gulzar&family=Noto+Nastaliq+Urdu:wght@400;600;700&family=Vazirmatn:wght@500;600;700;800&family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  /* EYE-COMFORT FACTORY PALETTE (Dimmed Anti-Glare Slate & Pearl Sand) */
+  /* Replaced harsh blinding #FFFFFF with soft warm pearl slate & soft eggshell cards */
+  --color-bg: #EAEFF5;              /* Soft Pearl Slate Canvas (Comfortable for 9h shifts) */
+  --color-surface: #F8FAFC;         /* Dimmed Soft Off-White (Zero Eye Strain) */
+  --color-surface-elevated: #EEF2F6;/* Muted Ice Slate */
+  --color-surface-hover: #E2E8F0;   /* Gentle neutral hover */
+  --color-border: #CBD5E1;          /* Visible, readable slate border */
+  --color-border-light: #E2E8F0;    /* Hairline dividers */
+  --color-ink: #0F172A;             /* Deep Slate Navy (High contrast text) */
+  --color-muted: #475569;           /* Cool Slate */
+  --color-muted-light: #64748B;     /* Cool Slate Lighter */
+  --color-accent: #1D4ED8;          /* Athletic Cobalt */
+  --color-accent-hover: #1E40AF;    /* Deep Cobalt Hover */
+  --color-accent-light: #DBEAFE;    /* Soft blue tint */
+  --color-accent-contrast: #FFFFFF; /* Crisp White text on Cobalt */
+
+  /* Status Colors */
+  --color-live: #10B981;            /* Emerald Green (Telemetry, Online) */
+  --color-live-bg: #D1FAE5;
+  --color-pending: #D97706;         /* Warm Amber */
+  --color-pending-bg: #FEF3C7;
+  --color-overdue: #DC2626;         /* Crimson Red */
+  --color-overdue-bg: #FEE2E2;
+
+  --font-sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+  --font-urdu: 'Baloo Bhaijaan 2', system-ui, -apple-system, sans-serif;
+  --font-display: 'Barlow Condensed', sans-serif;
+}
+
+/* ANTI-GLARE EYE COMFORT OVERRIDE:
+   In light mode, neutralize harsh pure white (#FFFFFF) across cards and panels
+   to prevent eye fatigue during long 9-hour factory shifts */
+:not(.dark) .bg-white {
+  background-color: var(--color-surface) !important;
+}
+:not(.dark) .border-slate-200,
+:not(.dark) .border-slate-200\/80,
+:not(.dark) .border-slate-200\/90 {
+  border-color: #CBD5E1 !important;
+}
+
+.dark {
+  /* DARK MODE - DEEP SLATE & ELECTRIC COBALT */
+  --color-bg: #0B0F19;              /* Deep Navy/Black Canvas */
+  --color-surface: #111827;         /* Deep Slate Surface */
+  --color-surface-elevated: #1E293B;/* Slate Elevated */
+  --color-surface-hover: rgba(29, 78, 216, 0.15); /* Deep Cobalt Tint */
+  --color-border: #1E293B;          /* Dark Slate Border */
+  --color-border-light: #334155;
+  --color-ink: #F8FAFC;             /* Bright Slate Text */
+  --color-muted: #94A3B8;           /* Muted Slate Text */
+  --color-muted-light: #64748B;
+  --color-accent: #3B82F6;          /* Bright Cobalt */
+  --color-accent-hover: #2563EB;
+  --color-accent-light: rgba(59, 130, 246, 0.15);
+  --color-accent-contrast: #FFFFFF;
+
+  /* Status Colors Dark */
+  --color-live: #10B981;
+  --color-live-bg: rgba(6, 78, 59, 0.4);
+  --color-pending: #F59E0B;
+  --color-pending-bg: rgba(120, 53, 15, 0.4);
+  --color-overdue: #EF4444;
+  --color-overdue-bg: rgba(127, 29, 29, 0.4);
+}
+
+* {
+  box-sizing: border-box;
+  border-color: var(--color-border);
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
+
+/* Urdu Typography Optimization: Crisp, Horizontal & Bold with +20% scale everywhere */
+html[lang="ur"] {
+  font-size: 120% !important;
+}
+
+.font-urdu, [lang="ur"] {
+  font-family: var(--font-urdu) !important;
+  line-height: 1.55 !important;
+  letter-spacing: 0 !important;
+  font-weight: 600;
+  text-rendering: optimizeLegibility;
+}
+
+/* For mixed or inline elements explicitly tagged with .font-urdu in default mode */
+html:not([lang="ur"]) .font-urdu {
+  font-size: 1.2em !important;
+}
+
+/* Explicit pixel sizing overrides for Urdu mode to ensure +20% boost everywhere */
+html[lang="ur"] .text-\[10px\] { font-size: 12px !important; }
+html[lang="ur"] .text-\[11px\] { font-size: 13.2px !important; }
+html[lang="ur"] .text-\[12px\] { font-size: 14.4px !important; }
+html[lang="ur"] .text-\[13px\] { font-size: 15.6px !important; }
+html[lang="ur"] .text-\[14px\] { font-size: 16.8px !important; }
+html[lang="ur"] .text-\[15px\] { font-size: 18px !important; }
+
+/* Tabular Numbers for Timers & Metrics */
+.tabular-numbers {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Hairline Grid Utilities */
+.border-hairline {
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--color-border);
+}
+
+.display-title {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-muted);
+}
+
+/* Infinite Marquee Animation for Shopify-Style Announcement Bar & Strips */
+@keyframes marquee {
+  0% {
+    transform: translate3d(0%, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 25s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   PUCK THEME EDITOR LAYOUT & 3-COLUMN INDEPENDENT SCROLL FIX
+   Ensures:
+   1. Left sidebar (Outline) has its own independent scroll.
+   2. Middle canvas / preview has its own independent scroll.
+   3. Right sidebar (Inspector) has its own independent scroll.
+   Zero page-level scrolling, zero clipping or overlay of the last fields.
+   ───────────────────────────────────────────────────────────── */
+[class*="_Puck_"],
+[class*="_PuckLayout_"] {
+  height: 100% !important;
+  max-height: 100% !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Force the grid row to be strict 1fr so it CANNOT expand with tall sidebar content */
+[class*="_PuckLayout-inner_"] {
+  height: 100% !important;
+  max-height: 100% !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  grid-template-rows: min-content 1fr !important;
+}
+
+@media (min-width: 638px) {
+  [class*="_PuckLayout-inner_"] {
+    grid-template-rows: min-content 1fr !important;
+  }
+}
+
+/* LEFT SIDEBAR: Independent Scroll */
+[class*="_Sidebar--left"] {
+  height: 100% !important;
+  max-height: 100% !important;
+  min-height: 0 !important;
+  width: 288px !important;
+  min-width: 288px !important;
+  max-width: 288px !important;
+  overflow: hidden !important;
+  border-right: 1px solid var(--color-border) !important;
+  background: var(--color-surface) !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+[class*="_Drawer_"] {
+  height: 100% !important;
+  max-height: 100% !important;
+  min-height: 0 !important;
+  width: 100% !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 0 !important;
+}
+
+/* RIGHT SIDEBAR: Independent Scroll */
+[class*="_Sidebar--right"] {
+  height: 100% !important;
+  max-height: 100% !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  overscroll-behavior: contain !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure content inside right sidebar can scroll cleanly to the very bottom */
+[class*="_SidebarSection-content"] {
+  min-height: 0 !important;
+  padding-bottom: 96px !important;
+}
+
+/* Middle Preview / Canvas: Independent Viewport */
+[class*="_Canvas_"],
+[class*="_Frame_"] {
+  height: 100% !important;
+  max-height: 100% !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Remove ugly browser spin buttons (increment/decrement arrows) from number inputs in editor */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none !important;
+  margin: 0 !important;
+}
+input[type="number"] {
+  -moz-appearance: textfield !important;
+}
+
+
+

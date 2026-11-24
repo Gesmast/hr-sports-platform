@@ -13,7 +13,7 @@ export const SITE_CONFIG = {
   url: process.env.NEXT_PUBLIC_SITE_URL || 'https://hrsports.com',
   email: 'inquiries@hrsports.com',
   supportEmail: 'support@hrsports.com',
-  phone: '+1 (800) 582-9174',
+  phone: '+92 313 8484511',
   whatsappNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+92 313 8484511',
   whatsappDefaultMessage: 'Hello HR Sports Team, I am reaching out regarding custom sportswear manufacturing and would like to request details on pricing and production.',
   address: 'Green Building, Block B New Chauburji Park, Multan Road, Lahore, 54000, Pakistan',

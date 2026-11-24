@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { quoteSchema } from '@/lib/schemas/quote';
 import { db } from '@/lib/db';
-import { emailService } from '@/lib/resend';
-import { uploadBase64ToR2, uploadBufferToR2, getNextInquiryNumber } from '@/lib/r2';
+import { platformEmails, EmailAttachment } from '@/lib/email';
+import { uploadBase64ToR2, uploadBufferToR2, getNextInquiryNumber, getPresignedDownloadUrl } from '@/lib/r2';
 import { generateQuoteSpecPdf } from '@/lib/pdf/quote-spec-compiler';
 import { formatInquiryCode } from '@/lib/utils';
+import { createClient, createAdminClient } from '@/lib/supabase/server';
 
 export async function POST(req: NextRequest) {
   try {
@@ -125,6 +126,67 @@ export async function POST(req: NextRequest) {
     }
 
     // 4. Persist in database with 8-digit inquiry code and R2 file records
+    let supabaseInquiryId: string | null = null;
+    try {
+      const supabase = await createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      const adminClient = createAdminClient();
+
+      let targetUserId = user?.id || null;
+      if (!targetUserId && payload.contactEmail) {
+        const { data: profile } = await adminClient
+          .from('profiles')
+          .select('id')
+          .eq('email', payload.contactEmail)
+          .maybeSingle();
+        if (profile) targetUserId = profile.id;
+      }
+
+      const pdfUrl = r2UploadedFiles['specification_pdf']
+        ? `${process.env.R2_ENDPOINT || ''}/${r2UploadedFiles['specification_pdf']}`
+        : null;
+
+      const { data: insertedInquiry } = await adminClient
+        .from('inquiries')
+        .insert({
+          reference_id: inquiryCode,
+          user_id: targetUserId,
+          contact_email: payload.contactEmail,
+          garment_type: payload.garmentType || payload.uniform_type || payload.sport || 'Custom Garment Spec',
+          quantity: payload.volumeMOQ || 100,
+          fabric_spec: payload.fabric_type || payload.fabric_family || payload.materialVariant || '',
+          target_price: (payload as any).targetPrice ? Number((payload as any).targetPrice) : null,
+          custom_spec_notes: payload.designNotes || payload.logo_placement_note || '',
+          status: 'pending',
+          pdf_url: pdfUrl,
+          inquiry_metadata: payload,
+        })
+        .select()
+        .single();
+
+      if (insertedInquiry) {
+        supabaseInquiryId = insertedInquiry.id;
+
+        if (targetUserId && Object.keys(r2UploadedFiles).length > 0) {
+          const attachmentsToInsert: any[] = [];
+          for (const [key, path] of Object.entries(r2UploadedFiles)) {
+            attachmentsToInsert.push({
+              inquiry_id: insertedInquiry.id,
+              uploaded_by: targetUserId,
+              file_name: path.split('/').pop() || key,
+              file_type: key.includes('pdf') ? 'application/pdf' : key.includes('excel') ? 'application/vnd.ms-excel' : 'image/png',
+              storage_path: path,
+              storage_bucket: 'hr-sports-inquiries',
+              file_category: key.includes('pdf') ? 'spec_sheet' : key.includes('excel') ? 'spec_sheet' : 'tech_pack',
+            });
+          }
+          await adminClient.from('inquiry_attachments').insert(attachmentsToInsert);
+        }
+      }
+    } catch (supaErr) {
+      console.error('[Supabase Inquiry Persist Warning]:', supaErr);
+    }
+
     const inquiry = await db.saveQuoteInquiry({
       ...payload,
       inquiry_code: inquiryCode,
@@ -132,11 +194,89 @@ export async function POST(req: NextRequest) {
       r2_files: r2UploadedFiles,
     } as any);
 
-    // 5. Dispatch Transactional Emails
-    const [clientEmailRes, adminEmailRes] = await Promise.allSettled([
-      emailService.sendQuoteConfirmation(payload, inquiryCode),
-      emailService.sendAdminNotification(payload, inquiryCode),
-    ]);
+    // 5. Build Attachments / Expiring Cloudflare R2 Links for Customer Confirmation
+    const clientAttachments: EmailAttachment[] = [];
+    const expiringFileLinks: Array<{ name: string; url: string; sizeMb: string }> = [];
+
+    let totalSizeBytes = 0;
+    if (payload.designFiles && Array.isArray(payload.designFiles)) {
+      for (const f of payload.designFiles) {
+        totalSizeBytes += f.sizeBytes || 0;
+      }
+    }
+
+    const SAFE_ATTACHMENT_LIMIT = 15 * 1024 * 1024; // 15 MB
+    for (const [key, path] of Object.entries(r2UploadedFiles)) {
+      const fileName = path.split('/').pop() || `${key}.pdf`;
+      if (totalSizeBytes > 0 && totalSizeBytes <= SAFE_ATTACHMENT_LIMIT) {
+        // Can be attached directly or downloaded via signed link
+      }
+      try {
+        const presignedUrl = await getPresignedDownloadUrl(path, 7 * 86400); // 7-day secure link
+        if (presignedUrl) {
+          expiringFileLinks.push({
+            name: fileName,
+            url: presignedUrl,
+            sizeMb: 'Attached',
+          });
+        }
+      } catch (presignErr) {
+        console.warn('[R2 Presign Warning]:', presignErr);
+      }
+    }
+
+    // 6. Send Customer Inquiry Confirmation (Sender: inquiry@thehrsports.com, No-Reply)
+    try {
+      await platformEmails.sendInquiryConfirmation({
+        referenceId: inquiryCode,
+        clientName: payload.companyName || payload.order_by || 'Valued Customer',
+        contactEmail: payload.contactEmail,
+        garmentType: payload.garmentType || payload.uniform_type || 'Custom Garment Spec',
+        quantity: Number(payload.volumeMOQ) || 100,
+        fabricSpec: payload.fabric_type || payload.materialVariant || 'Standard Technical Fabric',
+        targetDate: payload.targetDeliveryDate,
+        attachedFilesCount: Object.keys(r2UploadedFiles).length,
+        expiringFileLinks: expiringFileLinks.length > 0 ? expiringFileLinks : undefined,
+      }, clientAttachments.length > 0 ? clientAttachments : undefined);
+    } catch (emailErr) {
+      console.error('[Inquiry Email Error]:', emailErr);
+    }
+
+    // 7. In-Dashboard Realtime Notifications for Factory Staff (Replaces Admin Email per Change 6)
+    try {
+      const adminClient = createAdminClient();
+      const customerName = payload.companyName || payload.order_by || 'Customer';
+      const notificationTitle = `New B2B Inquiry #${inquiryCode}`;
+      const notificationMsg = `${customerName} submitted a new inquiry for ${payload.volumeMOQ || 100} units of ${payload.garmentType || 'custom apparel'}.`;
+
+      // Notify Owner and Operations Coordinator in dashboard
+      await adminClient.from('notifications').insert([
+        {
+          target_role: 'owner',
+          event_type: 'inquiry_created',
+          title: notificationTitle,
+          message: notificationMsg,
+          customer_name: customerName,
+          company_name: payload.companyName || null,
+          inquiry_id: supabaseInquiryId || null,
+          request_no: inquiryCode,
+          is_urgent: false,
+        },
+        {
+          target_role: 'hamza',
+          event_type: 'inquiry_created',
+          title: notificationTitle,
+          message: notificationMsg,
+          customer_name: customerName,
+          company_name: payload.companyName || null,
+          inquiry_id: supabaseInquiryId || null,
+          request_no: inquiryCode,
+          is_urgent: false,
+        },
+      ]);
+    } catch (notifErr) {
+      console.warn('[Dashboard Notification Error]:', notifErr);
+    }
 
     return NextResponse.json(
       {

@@ -1,319 +1,242 @@
-'use client';
-
-import React, { useState } from 'react';
-import { useSession, signOut } from 'next-auth/react';
+import React from 'react';
 import Link from 'next/link';
 import {
   Package,
+  MessageSquareText,
   Clock,
+  Sparkles,
+  ArrowRight,
+  TrendingUp,
   Truck,
   CheckCircle2,
-  FileText,
-  Download,
-  ExternalLink,
+  AlertCircle,
   PlusCircle,
-  ShieldCheck,
-  Building,
-  User,
-  LogOut,
-  AlertCircle
+  FileText,
+  Palette
 } from 'lucide-react';
-import { mockOrders } from '@/lib/db';
-import { PortalOrder, OrderStage } from '@/types';
-import { BorderCard } from '@/components/shared/BorderCard';
-import { Badge } from '@/components/shared/Badge';
+import { getUserInquiries, getUserOrders, getUserProfile } from '@/app/actions/portal';
 import { Button } from '@/components/shared/Button';
 
-const stageSteps: { key: OrderStage; label: string }[] = [
-  { key: 'received', label: 'Order Received' },
-  { key: 'sample_approved', label: 'Sample Approved' },
-  { key: 'in_production', label: 'In Production' },
-  { key: 'quality_check', label: 'AQL 1.0 QC' },
-  { key: 'shipped', label: 'Dispatched' },
-];
+export default async function PortalDashboardPage() {
+  const [profile, { currentInquiries, pastInquiries }, orders] = await Promise.all([
+    getUserProfile(),
+    getUserInquiries(),
+    getUserOrders(),
+  ]);
 
-export default function PortalPage() {
-  const { data: session } = useSession();
-  const [activeTab, setActiveTab] = useState<'all' | 'in_production' | 'shipped'>('all');
-
-  // Filter orders for active user or demo fallback
-  const userEmail = session?.user?.email || 'client@demo.com';
-  const orders = mockOrders;
-
-  const filteredOrders = activeTab === 'all'
-    ? orders
-    : orders.filter((o) => o.stage === activeTab);
-
-  const getStageIndex = (stage: OrderStage): number => {
-    return stageSteps.findIndex((s) => s.key === stage);
-  };
-
-  const getStageBadge = (stage: OrderStage) => {
-    switch (stage) {
-      case 'received':
-        return <Badge variant="outline">Intake Logged</Badge>;
-      case 'sample_approved':
-        return <Badge variant="surface">Sample Signed Off</Badge>;
-      case 'in_production':
-        return <Badge variant="warning">In Production</Badge>;
-      case 'quality_check':
-        return <Badge variant="surface">QC Inspection</Badge>;
-      case 'shipped':
-        return <Badge variant="success">Shipped DDP</Badge>;
-      default:
-        return <Badge variant="outline">{stage}</Badge>;
-    }
-  };
+  const activeOrders = orders.filter((o) => o.order_status === 'in_production');
+  const quotesAwaitingReview = currentInquiries.filter(
+    (i) => i.status === 'quoted' && !i.isQuoteExpired
+  );
+  const pendingDesignApprovals = currentInquiries.filter(
+    (i) => (i.client_approval_unlocked && !i.design_approved_at) || i.status === 'in_design'
+  );
 
   return (
-    <div className="py-10 md:py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        {/* Top Header & Client Credentials Status */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white border-hairline border-border rounded-base p-6 sm:p-8">
+    <div className="space-y-4 sm:space-y-5 text-black w-full">
+      {/* Welcome Banner: Stretches full width, larger text for mobile & tablet */}
+      <div className="bg-white rounded-2xl py-4 sm:py-5 px-4 sm:px-6 shadow-xs border border-gray-200/90 w-full">
+        <h1 className="text-2xl sm:text-3xl font-black text-black tracking-tight">
+          Welcome, {profile?.full_name || 'Client Team'}
+        </h1>
+        <p className="text-xs sm:text-sm text-zinc-700 font-medium mt-1 leading-relaxed">
+          Manage custom sports apparel production, review factory quotes, and track order progress in real time.
+        </p>
+      </div>
+
+      {/* KPI Stats Grid: Full width, larger text size on mobile & tablet */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full">
+        <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-xs border border-gray-200/90 hover:border-gray-300 transition flex flex-col justify-between">
+          <div className="flex items-center justify-between text-black mb-1.5">
+            <span className="text-xs sm:text-sm font-mono uppercase tracking-wider font-bold text-zinc-700">
+              Current Orders
+            </span>
+            <Package className="w-4 h-4 sm:w-5 sm:h-5 text-black shrink-0" />
+          </div>
+          <div className="text-2xl sm:text-3xl font-black text-black tracking-tight my-1">
+            {activeOrders.length}
+          </div>
+          <span className="text-xs text-zinc-600 font-mono block">In factory production</span>
+        </div>
+
+        <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-xs border border-gray-200/90 hover:border-gray-300 transition flex flex-col justify-between">
+          <div className="flex items-center justify-between text-black mb-1.5">
+            <span className="text-xs sm:text-sm font-mono uppercase tracking-wider font-bold text-zinc-700 truncate">
+              Design Approvals
+            </span>
+            <Palette className="w-4 h-4 sm:w-5 sm:h-5 text-black shrink-0" />
+          </div>
+          <div className="text-2xl sm:text-3xl font-black text-black tracking-tight my-1">
+            {pendingDesignApprovals.length}
+          </div>
+          <span className="text-xs text-zinc-600 font-mono block">Awaiting sign-off</span>
+        </div>
+
+        <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-xs border border-gray-200/90 hover:border-gray-300 transition flex flex-col justify-between">
+          <div className="flex items-center justify-between text-black mb-1.5">
+            <span className="text-xs sm:text-sm font-mono uppercase tracking-wider font-bold text-zinc-700">
+              Inquiries
+            </span>
+            <MessageSquareText className="w-4 h-4 sm:w-5 sm:h-5 text-black shrink-0" />
+          </div>
+          <div className="text-2xl sm:text-3xl font-black text-black tracking-tight my-1">
+            {currentInquiries.length}
+          </div>
+          <span className="text-xs text-zinc-600 font-mono block">Active inquiries</span>
+        </div>
+
+        <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-xs border border-gray-200/90 hover:border-gray-300 transition flex flex-col justify-between">
+          <div className="flex items-center justify-between text-black mb-1.5">
+            <span className="text-xs sm:text-sm font-mono uppercase tracking-wider font-bold text-zinc-700 truncate">
+              Quote Approvals
+            </span>
+            <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-black shrink-0" />
+          </div>
+          <div className="text-2xl sm:text-3xl font-black text-black tracking-tight my-1">
+            {quotesAwaitingReview.length}
+          </div>
+          <span className="text-xs text-zinc-600 font-mono block">Awaiting decision</span>
+        </div>
+      </div>
+
+      {/* Two Column Grid: Current Inquiries + Active Orders (Stretching full width) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 w-full">
+        {/* Left Column: Recent Current Inquiries */}
+        <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-xs border border-gray-200/90 flex flex-col justify-between w-full">
           <div>
-            <div className="text-[10px] font-mono font-bold uppercase tracking-widest text-muted mb-1 flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-emerald-600" />
-              Authenticated OEM Client Area
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100 mb-3.5">
+              <div className="flex items-center gap-2">
+                <MessageSquareText className="w-5 h-5 text-black shrink-0" />
+                <h2 className="text-base sm:text-lg font-bold text-black tracking-tight">Current Inquiries</h2>
+              </div>
+              <Link
+                href="/portal/inquiries"
+                className="text-xs sm:text-sm text-zinc-700 hover:text-black font-bold flex items-center gap-1 transition"
+              >
+                View all ({currentInquiries.length})
+                <ArrowRight className="w-3.5 h-3.5 text-black" />
+              </Link>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-ink tracking-tight">
-              Production Dashboard
-            </h1>
-            <div className="flex flex-wrap items-center gap-3 mt-1.5 text-xs text-muted font-mono">
-              <span className="flex items-center gap-1 text-ink font-semibold">
-                <Building className="w-3.5 h-3.5" />
-                {(session?.user as any)?.companyName || 'Apex Sports Syndicate'}
-              </span>
-              <span>•</span>
-              <span className="flex items-center gap-1">
-                <User className="w-3.5 h-3.5" />
-                {session?.user?.email || 'client@demo.com'}
-              </span>
-            </div>
-          </div>
 
-          <div className="flex items-center gap-3">
-            <Link href="/contact">
-              <Button variant="primary" size="md" className="gap-2">
-                <PlusCircle className="w-4 h-4" />
-                New Production Batch
-              </Button>
-            </Link>
-            <Button
-              variant="outline"
-              size="md"
-              onClick={() => signOut({ callbackUrl: '/' })}
-              className="gap-1.5 text-muted hover:text-ink"
-            >
-              <LogOut className="w-4 h-4" />
-              Sign Out
-            </Button>
-          </div>
-        </div>
+            {currentInquiries.length === 0 ? (
+              <div className="py-8 text-center text-xs sm:text-sm text-zinc-600 font-mono">
+                No active inquiries currently. Submit a tech pack to receive a commercial quote.
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                {currentInquiries.slice(0, 3).map((inquiry) => {
+                  const activeQuote = inquiry.quotes?.find((q: any) => q.status === 'active');
 
-        {/* Quick Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 font-mono">
-          <BorderCard variant="default" className="p-4 sm:p-5">
-            <div className="text-xs text-muted uppercase">Active Production</div>
-            <div className="text-2xl sm:text-3xl font-extrabold text-ink tracking-tight mt-1">
-              01
-            </div>
-            <div className="text-[11px] text-amber-700 mt-0.5 font-sans">In mass sublimation</div>
-          </BorderCard>
-
-          <BorderCard variant="default" className="p-4 sm:p-5">
-            <div className="text-xs text-muted uppercase">Completed / Shipped</div>
-            <div className="text-2xl sm:text-3xl font-extrabold text-ink tracking-tight mt-1">
-              01
-            </div>
-            <div className="text-[11px] text-emerald-700 mt-0.5 font-sans">In transit (FedEx)</div>
-          </BorderCard>
-
-          <BorderCard variant="default" className="p-4 sm:p-5">
-            <div className="text-xs text-muted uppercase">Total Units Milled</div>
-            <div className="text-2xl sm:text-3xl font-extrabold text-ink tracking-tight mt-1">
-              1,650
-            </div>
-            <div className="text-[11px] text-muted mt-0.5 font-sans">AQL 1.0 Passed</div>
-          </BorderCard>
-
-          <BorderCard variant="default" className="p-4 sm:p-5">
-            <div className="text-xs text-muted uppercase">Physical Samples</div>
-            <div className="text-2xl sm:text-3xl font-extrabold text-ink tracking-tight mt-1">
-              100%
-            </div>
-            <div className="text-[11px] text-muted mt-0.5 font-sans">Approved before cut</div>
-          </BorderCard>
-        </div>
-
-        {/* Filter Tabs for Orders */}
-        <div className="flex items-center gap-2 border-b border-border-light pb-2 font-mono text-xs">
-          <button
-            onClick={() => setActiveTab('all')}
-            className={`px-3 py-1.5 rounded-base font-bold uppercase tracking-wider transition-colors ${
-              activeTab === 'all' ? 'bg-ink text-white' : 'bg-white text-muted hover:text-ink border-hairline border-border'
-            }`}
-          >
-            All Production Orders ({orders.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('in_production')}
-            className={`px-3 py-1.5 rounded-base font-bold uppercase tracking-wider transition-colors ${
-              activeTab === 'in_production' ? 'bg-ink text-white' : 'bg-white text-muted hover:text-ink border-hairline border-border'
-            }`}
-          >
-            In Factory (1)
-          </button>
-          <button
-            onClick={() => setActiveTab('shipped')}
-            className={`px-3 py-1.5 rounded-base font-bold uppercase tracking-wider transition-colors ${
-              activeTab === 'shipped' ? 'bg-ink text-white' : 'bg-white text-muted hover:text-ink border-hairline border-border'
-            }`}
-          >
-            Dispatched (1)
-          </button>
-        </div>
-
-        {/* Orders List */}
-        <div className="space-y-6">
-          {filteredOrders.map((order) => {
-            const currentStageIdx = getStageIndex(order.stage);
-
-            return (
-              <BorderCard key={order.id} variant="default" className="p-6 sm:p-8 space-y-6">
-                {/* Order Top Bar */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border-light pb-4">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs font-mono font-extrabold text-ink bg-surface px-2 py-0.5 rounded-sm border-hairline border-border">
-                        {order.referenceNumber}
-                      </span>
-                      {getStageBadge(order.stage)}
-                    </div>
-                    <h3 className="text-xl font-extrabold text-ink tracking-tight">
-                      {order.garmentType}
-                    </h3>
-                  </div>
-
-                  <div className="text-left sm:text-right font-mono text-xs text-muted">
-                    <div>Quantity: <strong className="text-ink">{order.quantity} Units</strong></div>
-                    <div>Est. Delivery: <strong className="text-ink">{order.estimatedDeliveryDate}</strong></div>
-                  </div>
-                </div>
-
-                {/* Stage Progress Timeline Bar */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-xs font-mono text-muted mb-1">
-                    <span>Manufacturing Milestone</span>
-                    <span>{order.productionProgressPercent}% Complete</span>
-                  </div>
-
-                  <div className="w-full h-2 bg-surface rounded-full overflow-hidden border-hairline border-border-light">
-                    <div
-                      className="h-full bg-ink transition-all duration-500 rounded-full"
-                      style={{ width: `${order.productionProgressPercent}%` }}
-                    />
-                  </div>
-
-                  {/* 5 Milestone Step Nodes */}
-                  <div className="grid grid-cols-5 gap-1 pt-2 font-mono text-[10px] text-center">
-                    {stageSteps.map((step, idx) => {
-                      const isPast = idx < currentStageIdx;
-                      const isCurrent = idx === currentStageIdx;
-                      return (
-                        <div key={step.key} className="flex flex-col items-center">
-                          <div
-                            className={`w-3.5 h-3.5 rounded-full mb-1 flex items-center justify-center border-hairline ${
-                              isCurrent
-                                ? 'bg-ink text-white border-ink ring-2 ring-zinc-300'
-                                : isPast
-                                ? 'bg-emerald-600 text-white border-emerald-600'
-                                : 'bg-surface text-muted border-border'
-                            }`}
-                          >
-                            {isPast && <CheckCircle2 className="w-2.5 h-2.5" />}
-                          </div>
-                          <span className={isCurrent ? 'font-bold text-ink' : 'text-muted'}>
-                            {step.label}
+                  return (
+                    <Link
+                      key={inquiry.id}
+                      href={`/portal/inquiries/${inquiry.id}`}
+                      className="block p-3 sm:p-4 rounded-xl border border-gray-200 hover:border-gray-300 bg-gray-50/50 hover:bg-gray-100/70 transition group shadow-2xs w-full"
+                    >
+                      <div className="flex items-center justify-between gap-2 mb-1.5">
+                        <span className="text-xs sm:text-sm font-mono font-black text-black">
+                          {inquiry.reference_id}
+                        </span>
+                        <span className="text-[11px] font-mono uppercase px-2.5 py-0.5 rounded-full bg-zinc-200 text-black font-bold">
+                          {inquiry.status.replace('_', ' ')}
+                        </span>
+                      </div>
+                      <div className="font-bold text-sm sm:text-base text-black truncate">
+                        {inquiry.garment_type}
+                      </div>
+                      <div className="flex items-center justify-between text-xs sm:text-sm text-zinc-700 mt-2 font-mono">
+                        <span>{inquiry.quantity} units</span>
+                        {activeQuote ? (
+                          <span className="text-emerald-800 font-bold">
+                            Quoted: ${Number(activeQuote.unit_price).toFixed(2)}/u
                           </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Order Details & Logistics Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-surface border-hairline border-border rounded-base p-4 text-xs font-mono">
-                  <div className="space-y-1.5">
-                    <div>
-                      <span className="text-muted">Fabric Spec: </span>
-                      <span className="font-bold text-ink">{order.material}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted">Sample Signoff: </span>
-                      <span className="font-bold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded-sm border-hairline border-emerald-300">
-                        {order.sampleStatus}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-muted">Order Intake Date: </span>
-                      <span className="text-ink">{order.submittedDate}</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    {order.carrier && (
-                      <div>
-                        <span className="text-muted">Carrier Gateway: </span>
-                        <span className="font-bold text-ink">{order.carrier}</span>
+                        ) : (
+                          <span className="text-zinc-500 font-medium">Awaiting Factory Quote</span>
+                        )}
                       </div>
-                    )}
-                    {order.trackingNumber && (
-                      <div>
-                        <span className="text-muted">Air Waybill / Tracking: </span>
-                        <span className="font-bold text-ink underline">{order.trackingNumber}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <div className="mt-4 pt-3.5 border-t border-gray-100">
+            <Link href="/request-a-quote">
+              <button className="w-full min-h-[46px] flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-black hover:bg-zinc-800 text-white border border-black text-xs sm:text-sm font-bold transition shadow-sm cursor-pointer">
+                <PlusCircle className="w-4 h-4 text-white" />
+                <span>Submit Another Inquiry</span>
+              </button>
+            </Link>
+          </div>
+        </div>
+
+        {/* Right Column: Active Manufacturing Orders */}
+        <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-xs border border-gray-200/90 flex flex-col justify-between w-full">
+          <div>
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100 mb-3.5">
+              <div className="flex items-center gap-2">
+                <Package className="w-5 h-5 text-black shrink-0" />
+                <h2 className="text-base sm:text-lg font-bold text-black tracking-tight">Active Orders & Tracking</h2>
+              </div>
+              <Link
+                href="/portal/orders"
+                className="text-xs sm:text-sm text-zinc-700 hover:text-black font-bold flex items-center gap-1 transition"
+              >
+                View all ({orders.length})
+                <ArrowRight className="w-3.5 h-3.5 text-black" />
+              </Link>
+            </div>
+
+            {orders.length === 0 ? (
+              <div className="py-8 text-center text-xs sm:text-sm text-zinc-600 font-mono">
+                No active orders in production. Convert an accepted quote to initiate factory production.
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                {orders.slice(0, 3).map((order) => {
+                  const completedCount = order.tracking_stages?.filter(
+                    (s: any) => s.status === 'complete'
+                  ).length || 0;
+
+                  return (
+                    <Link
+                      key={order.id}
+                      href={`/portal/orders/${order.id}`}
+                      className="block p-3 sm:p-4 rounded-xl border border-gray-200 hover:border-gray-300 bg-gray-50/50 hover:bg-gray-100/70 transition group shadow-2xs w-full"
+                    >
+                      <div className="flex items-center justify-between gap-2 mb-1.5">
+                        <span className="text-xs sm:text-sm font-mono font-black text-black">
+                          {order.order_number}
+                        </span>
+                        <span className="text-[11px] font-mono uppercase px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 font-bold border border-emerald-200">
+                          Stage {completedCount}/5
+                        </span>
                       </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Downloadable Documents Table */}
-                <div className="space-y-3">
-                  <h4 className="text-xs font-mono uppercase tracking-widest font-bold text-ink flex items-center gap-1.5">
-                    <FileText className="w-3.5 h-3.5" />
-                    Authorized Production Documents & Certificates
-                  </h4>
-
-                  <div className="divide-y divide-border-light border-hairline border-border rounded-base bg-white overflow-hidden text-xs">
-                    {order.documents.map((doc) => (
-                      <div key={doc.id} className="p-3.5 flex items-center justify-between hover:bg-zinc-50 transition-colors">
-                        <div className="flex items-center gap-3">
-                          <FileText className="w-4 h-4 text-muted shrink-0" />
-                          <div>
-                            <span className="font-bold text-ink block">{doc.name}</span>
-                            <span className="text-[11px] font-mono text-muted">
-                              {doc.type.toUpperCase()} • {doc.size} • Issued {doc.date}
-                            </span>
-                          </div>
-                        </div>
-
-                        <a
-                          href={doc.downloadUrl}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            alert(`Downloading verified production document: ${doc.name}`);
-                          }}
-                          className="px-3 py-1.5 bg-surface hover:bg-zinc-200 text-ink rounded-base font-mono text-[11px] font-bold border-hairline border-border flex items-center gap-1.5 transition-colors"
-                        >
-                          <Download className="w-3.5 h-3.5" />
-                          Download
-                        </a>
+                      <div className="font-bold text-sm sm:text-base text-black truncate">
+                        {order.spec_summary?.garment_type || 'Custom Apparel Batch'}
                       </div>
-                    ))}
-                  </div>
-                </div>
-              </BorderCard>
-            );
-          })}
+                      <div className="flex items-center justify-between text-xs sm:text-sm text-zinc-700 mt-2 font-mono">
+                        <span>{order.total_quantity} units</span>
+                        <span className="font-bold text-black">
+                          ${Number(order.total_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <div className="mt-4 pt-3.5 border-t border-gray-100">
+            <Link href="/portal/orders">
+              <button className="w-full min-h-[46px] flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-black hover:bg-zinc-800 text-white border border-black text-xs sm:text-sm font-bold transition shadow-sm cursor-pointer">
+                <Truck className="w-4 h-4 text-white" />
+                <span>View Orders Tracking</span>
+              </button>
+            </Link>
+          </div>
         </div>
       </div>
     </div>

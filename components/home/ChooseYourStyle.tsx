@@ -7,38 +7,42 @@ import { styleCategories } from '@/data/styles';
 import { SectionHeading } from '@/components/shared/SectionHeading';
 import { BorderCard } from '@/components/shared/BorderCard';
 
+const SPORTSWEAR_SLUGS = ['cricket', 'football', 'basketball', 'gym-activewear', 'hockey'];
+const UNIFORM_SLUGS = ['corporate-uniforms', 'security-uniforms', 'promotional-uniforms'];
+
 export const ChooseYourStyle: React.FC = () => {
-  const [activeFilter, setActiveFilter] = useState<'all' | 'sport' | 'fitness' | 'casual'>('all');
+  const [activeFilter, setActiveFilter] = useState<'all' | 'sportswear' | 'uniforms'>('all');
 
   const filteredCategories = activeFilter === 'all'
     ? styleCategories
-    : activeFilter === 'fitness'
-    ? styleCategories.filter((c) => c.slug === 'activewear')
-    : activeFilter === 'casual'
-    ? styleCategories.filter((c) => c.slug === 'casual-wear')
-    : styleCategories.filter((c) => c.slug !== 'activewear' && c.slug !== 'casual-wear');
+    : activeFilter === 'sportswear'
+    ? styleCategories.filter((c) => SPORTSWEAR_SLUGS.includes(c.slug))
+    : styleCategories.filter((c) => UNIFORM_SLUGS.includes(c.slug));
 
   return (
     <section id="styles" className="py-20 md:py-28 bg-white border-b border-hairline border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Heading */}
         <div className="max-w-3xl mb-12">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black text-white text-xs font-mono font-black uppercase tracking-wider mb-3">
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span>Coming Soon</span>
+          </div>
           <div className="text-[11px] font-mono font-bold tracking-[0.2em] uppercase text-muted mb-2 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-ink" />
             Custom Apparel Catalog
           </div>
           <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-ink leading-[1.1]">
-            Choose Your Apparel
+            Apparel Categories <span className="text-zinc-400 font-black text-2xl sm:text-4xl">(Coming Soon)</span>
           </h2>
         </div>
 
         {/* Filter Quick Pills */}
         <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-8 scrollbar-none font-mono text-xs select-none">
           {[
-            { id: 'all', label: 'All Categories (8)' },
-            { id: 'sport', label: 'Team Sportswear' },
-            { id: 'fitness', label: 'Activewear & Compression' },
-            { id: 'casual', label: 'Casual & Merch' },
+            { id: 'all', label: `All Categories (${styleCategories.length})` },
+            { id: 'sportswear', label: 'Custom Sportswear (5)' },
+            { id: 'uniforms', label: 'Uniforms (3)' },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -59,7 +63,7 @@ export const ChooseYourStyle: React.FC = () => {
           {filteredCategories.map((category) => (
             <Link
               key={category.id}
-              href={`/styles/${category.slug}`}
+              href={`/${category.mainCategory || (SPORTSWEAR_SLUGS.includes(category.slug) ? 'custom-sportswear' : 'uniforms')}/${category.slug}`}
               className="group flex flex-col justify-between h-full block"
             >
               <BorderCard
@@ -77,14 +81,17 @@ export const ChooseYourStyle: React.FC = () => {
                     <div className="absolute top-2.5 left-2.5 bg-ink/90 text-white px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider rounded-sm backdrop-blur-xs">
                       {category.itemCount} Items
                     </div>
+                    <div className="absolute top-2.5 right-2.5 bg-black text-white px-2 py-0.5 text-[10px] font-mono font-black uppercase tracking-wider rounded-xs shadow-md">
+                      Coming Soon
+                    </div>
                   </div>
 
                   {/* Category Name & Tagline */}
                   <div className="text-[10px] font-mono font-bold uppercase tracking-widest text-muted mb-1">
                     {category.tagline}
                   </div>
-                  <h3 className="text-xl font-extrabold text-ink tracking-tight mb-2 group-hover:underline">
-                    {category.name}
+                  <h3 className="text-xl font-extrabold text-ink tracking-tight mb-2 group-hover:underline flex items-center justify-between">
+                    <span>{category.name}</span>
                   </h3>
 
                   {/* Short Description */}
@@ -101,17 +108,17 @@ export const ChooseYourStyle: React.FC = () => {
                           {item}
                         </span>
                       ))}
-                      {category.featuredProducts.length > 3 && (
-                        <span className="text-muted py-0.5">+{category.featuredProducts.length - 3} more</span>
-                      )}
                     </div>
                   </div>
                 </div>
 
-                {/* Explore Button */}
-                <div className="pt-3 border-t border-border-light flex items-center justify-between text-xs font-mono font-bold uppercase tracking-wider text-ink group-hover:text-black">
-                  <span>Explore Apparel</span>
-                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                {/* View Styles Link */}
+                <div className="pt-4 border-t border-hairline border-border-light flex items-center justify-between text-xs font-mono font-bold uppercase tracking-wider text-ink group-hover:text-black">
+                  <span className="font-extrabold text-amber-600">Coming Soon</span>
+                  <div className="flex items-center gap-1">
+                    <span>Explore</span>
+                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                  </div>
                 </div>
               </BorderCard>
             </Link>

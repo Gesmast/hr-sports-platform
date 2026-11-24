@@ -63,7 +63,7 @@ export default function ContactPage() {
               <div className="flex items-center justify-center gap-3">
                 {/* Facebook */}
                 <a
-                  href="https://facebook.com"
+                  href="https://www.facebook.com/thehrsports"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Facebook"
@@ -76,7 +76,7 @@ export default function ContactPage() {
 
                 {/* Instagram */}
                 <a
-                  href="https://instagram.com"
+                  href="https://www.instagram.com/thehrsports.co/"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Instagram"

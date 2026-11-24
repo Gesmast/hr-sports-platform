@@ -1,20 +1,18 @@
-import { withAuth } from 'next-auth/middleware';
-import { NextResponse } from 'next/server';
+import { updateSession } from '@/lib/supabase/middleware';
+import { type NextRequest } from 'next/server';
 
-export default withAuth(
-  function middleware(req) {
-    return NextResponse.next();
-  },
-  {
-    callbacks: {
-      authorized: ({ token }) => !!token,
-    },
-    pages: {
-      signIn: '/',
-    },
-  }
-);
+export async function middleware(request: NextRequest) {
+  return await updateSession(request);
+}
 
 export const config = {
-  matcher: ['/portal/:path*'],
+  matcher: [
+    /*
+     * Match all request paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico, images, icons, and static assets
+     */
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
 };

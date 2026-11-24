@@ -59,7 +59,7 @@ export const WhyChooseHRSports: React.FC = () => {
         {/* Section Header */}
         <div className="max-w-3xl mb-14 sm:mb-16">
           <div className="text-[11px] font-mono font-bold tracking-[0.2em] uppercase text-muted mb-3 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-burgundy" />
+            <span className="w-2 h-2 rounded-full bg-black" />
             20+ Years of Manufacturing Excellence
           </div>
           <h2 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-ink leading-[1.08]">
@@ -109,7 +109,7 @@ export const WhyChooseHRSports: React.FC = () => {
                 className="flex flex-col justify-between p-6 sm:p-7 bg-white group hover:border-ink hover:translate-y-[-2px] transition-all duration-200"
               >
                 <div>
-                  <div className="w-11 h-11 rounded-base bg-surface border-hairline border-border-light flex items-center justify-center text-ink mb-4 group-hover:bg-burgundy group-hover:text-white transition-colors duration-200">
+                  <div className="w-11 h-11 rounded-base bg-surface border-hairline border-border-light flex items-center justify-center text-ink mb-4 group-hover:bg-black group-hover:text-white transition-colors duration-200">
                     <Icon className="w-5 h-5 stroke-[1.75]" />
                   </div>
                   <h3 className="text-lg font-extrabold text-ink tracking-tight mb-2.5">

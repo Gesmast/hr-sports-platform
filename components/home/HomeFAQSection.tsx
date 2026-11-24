@@ -14,7 +14,7 @@ export const HomeFAQSection: React.FC = () => {
         {/* Section Header */}
         <div className="max-w-3xl mb-14 sm:mb-16">
           <div className="text-[11px] font-mono font-bold tracking-[0.2em] uppercase text-muted mb-3 flex items-center gap-2">
-            <HelpCircle className="w-4 h-4 text-burgundy" />
+            <HelpCircle className="w-4 h-4 text-black" />
             Questions & Direct Answers
           </div>
           <h2 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-ink leading-[1.08]">
@@ -35,7 +35,7 @@ export const HomeFAQSection: React.FC = () => {
           {/* Right Column: Sticky Contact & Help Prompt */}
           <div className="lg:col-span-4 sticky top-28 space-y-6">
             <div className="p-6 sm:p-7 bg-surface border-hairline border-border rounded-base space-y-4 shadow-xs">
-              <div className="w-10 h-10 rounded-base bg-white border-hairline border-border flex items-center justify-center text-burgundy">
+              <div className="w-10 h-10 rounded-base bg-white border-hairline border-border flex items-center justify-center text-black">
                 <MessageSquare className="w-5 h-5" />
               </div>
               <div>

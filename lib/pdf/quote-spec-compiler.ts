@@ -286,6 +286,11 @@ export async function generateQuoteSpecPdf(
     const logoSpecText = quoteData.has_logo === 'yes' ? 'CLIENT LOGO PROVIDED' : 'NO LOGO';
     const logoPlacementText = quoteData.logo_placement_note ? safeVal(quoteData.logo_placement_note) : (quoteData.has_logo === 'yes' ? 'AS SPECIFIED' : 'NONE');
 
+    const topPrimary = (quoteData as any).top_primary_color || garment.colour_value || quoteData.primaryColor;
+    const topSecondary = (quoteData as any).top_secondary_color || quoteData.accentColor;
+    const bottomPrimary = (quoteData as any).bottom_primary_color || garment.colour_value || quoteData.primaryColor;
+    const bottomSecondary = (quoteData as any).bottom_secondary_color || quoteData.accentColor;
+
     const specRows: SpecRow[] = isBottom
       ? [
           { label: 'BOTTOM TYPE', value: safeVal(garment.type_name) },
@@ -294,6 +299,8 @@ export async function generateQuoteSpecPdf(
             ? [{ label: 'CUT & SEW METHOD', value: safeVal(garment.trouser_cut_sew_method || quoteData.trouser_cut_sew_method) }]
             : []),
           { label: 'POCKET DESIGN', value: safeVal(garment.pocket_design || quoteData.pocket_design) },
+          { label: 'PRIMARY COLOUR', value: safeVal(bottomPrimary) },
+          ...(bottomSecondary ? [{ label: 'SECONDARY COLOUR', value: safeVal(bottomSecondary) }] : []),
           ...(quoteData.lookingFor === 'Uniform' && (garment.trouser_cargo_pockets || quoteData.trouser_cargo_pockets)
             ? [{ label: 'UNIFORM POCKETS', value: safeVal(garment.trouser_cargo_pockets || quoteData.trouser_cargo_pockets) }]
             : []),
@@ -309,6 +316,8 @@ export async function generateQuoteSpecPdf(
           { label: 'TOP TYPE', value: safeVal(garment.shirt_type || garment.type_name || quoteData.shirt_type) },
           { label: 'NECK STYLE', value: safeVal(garment.neck_style || quoteData.neck_style || garment.collar_type) },
           { label: 'ARM STYLE', value: safeVal(garment.arm_style || quoteData.arm_style || garment.sleeve_length) },
+          { label: 'PRIMARY COLOUR', value: safeVal(topPrimary) },
+          ...(topSecondary ? [{ label: 'SECONDARY COLOUR', value: safeVal(topSecondary) }] : []),
           { label: 'FABRIC', value: safeVal(garment.fabric_name || fullFabricName) },
           { label: 'BUTTON / ZIP', value: safeVal(garment.button_type) },
           { label: 'LOGO SPEC', value: logoSpecText },

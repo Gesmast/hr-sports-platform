@@ -1,5 +1,5 @@
 # dependencies
-/node_modules
+node_modules/
 /.pnp
 .pnp.js
 .yarn/install-state.gz
@@ -8,7 +8,7 @@
 /coverage
 
 # next.js
-/.next/
+.next/
 /out/
 
 # production
@@ -18,6 +18,9 @@
 .DS_Store
 *.pem
 Thumbs.db
+*.mp4
+/hero section videos/
+/process-videos/
 
 # debug
 npm-debug.log*

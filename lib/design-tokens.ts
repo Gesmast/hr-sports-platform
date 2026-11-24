@@ -5,19 +5,19 @@
 
 export const palette = {
   bg: '#FFFFFF',
-  surface: '#000000',
-  surfaceAlt: '#000000',
-  ink: '#111111',
-  inkAlt: '#1A1A1A',
-  border: '#27272A',
-  borderLight: '#D8D3C8',
+  surface: '#F4F4F5',
+  surfaceAlt: '#E4E4E7',
+  ink: '#000000',
+  inkAlt: '#111111',
+  border: '#E4E4E7',
+  borderLight: '#F4F4F5',
   muted: '#52525B',
   mutedLight: '#71717A',
   accentInverted: '#000000',
-  burgundy: '#950606',
-  burgundyHover: '#7B0505',
-  burgundyActive: '#5F0404',
-  burgundyLight: '#FDF2F4',
+  burgundy: '#000000',
+  burgundyHover: '#18181B',
+  burgundyActive: '#27272A',
+  burgundyLight: '#F4F4F5',
 } as const;
 
 export const radii = {

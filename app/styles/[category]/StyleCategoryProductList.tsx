@@ -66,21 +66,30 @@ export const StyleCategoryProductList: React.FC<StyleCategoryProductListProps> =
       </div>
 
       {/* Category Header */}
-      <div className="max-w-3xl mb-12 border-b border-hairline border-border-light pb-8">
-        <div className="text-[11px] font-mono font-bold tracking-[0.2em] uppercase text-muted mb-2 flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-ink" />
-          {category.tagline} • {category.itemCount} Garment Types Available
+      <div data-puck-index="1" className="max-w-3xl mb-12 border-b border-hairline border-border-light pb-8">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black text-white text-xs font-mono font-black uppercase tracking-widest shadow-xs">
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span>Coming Soon</span>
+          </div>
+          <div className="text-[11px] font-mono font-bold tracking-[0.2em] uppercase text-muted">
+            • {category.tagline}
+          </div>
         </div>
-        <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-ink leading-tight">
-          {category.name}
+
+        <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-ink leading-tight flex flex-wrap items-center gap-3">
+          <span>{category.name}</span>
+          <span className="font-black text-xs sm:text-sm uppercase tracking-widest px-3 py-1 bg-black text-white rounded-md inline-block">
+            Coming Soon
+          </span>
         </h1>
         <p className="mt-4 text-base sm:text-lg text-muted leading-relaxed">
-          {category.description}
+          <strong className="text-black font-extrabold">Coming Soon:</strong> {category.description} Production tech packs are in preparation. You can request a priority quote today.
         </p>
       </div>
 
       {/* Products Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+      <div data-puck-index="2" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
         {category.products.map((product) => (
           <BorderCard
             key={product.id}
@@ -95,6 +104,9 @@ export const StyleCategoryProductList: React.FC<StyleCategoryProductListProps> =
                   alt={product.name}
                   className="w-full h-full object-cover grayscale-10 hover:grayscale-0 transition-all duration-300"
                 />
+                <div className="absolute top-2.5 right-2.5 bg-black text-white px-2 py-0.5 text-[10px] font-mono font-black uppercase tracking-wider rounded-xs shadow-md">
+                  Coming Soon
+                </div>
               </div>
 
               {/* Product Name */}

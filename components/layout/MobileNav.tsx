@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { signOut } from 'next-auth/react';
+import { createClient } from '@/lib/supabase/client';
 import { ArrowRight, Shield, User, LogOut, Phone, Mail } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/shared/Button';
@@ -37,7 +37,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({
       const hash = href.replace('/', '');
       return (
         (pathname === '/' && currentHash === hash) ||
-        (href === '/#styles' && pathname.startsWith('/styles'))
+        (href === '/#styles' && (pathname.startsWith('/styles') || pathname.startsWith('/custom-sportswear') || pathname.startsWith('/uniforms')))
       );
     }
     return (
@@ -77,8 +77,8 @@ export const MobileNav: React.FC<MobileNavProps> = ({
                 className={cn(
                   'flex items-center justify-between p-3 rounded-base text-sm font-semibold tracking-wide border-hairline transition-colors',
                   isActive
-                    ? 'bg-burgundy text-white border-burgundy font-bold'
-                    : 'bg-transparent border-transparent text-muted hover:text-ink hover:bg-surface'
+                    ? 'bg-black text-white border-black font-bold'
+                    : 'bg-transparent border-transparent text-zinc-600 hover:text-black hover:bg-zinc-100'
                 )}
               >
                 <span>{link.label}</span>
@@ -101,9 +101,11 @@ export const MobileNav: React.FC<MobileNavProps> = ({
                 variant="outline"
                 size="sm"
                 className="w-full gap-2 text-muted"
-                onClick={() => {
+                onClick={async () => {
                   onClose();
-                  signOut({ callbackUrl: '/' });
+                  const supabase = createClient();
+                  await supabase.auth.signOut();
+                  window.location.href = '/';
                 }}
               >
                 <LogOut className="w-4 h-4" />
@@ -111,32 +113,48 @@ export const MobileNav: React.FC<MobileNavProps> = ({
               </Button>
             </div>
           ) : (
-            <Button
-              variant="outline"
-              size="md"
-              className="w-full gap-2 justify-center"
-              onClick={onOpenSignIn}
-            >
-              <User className="w-4 h-4" />
-              Sign Up / Login
-            </Button>
+            <Link href="/login" onClick={onClose} className="block">
+              <Button
+                variant="outline"
+                size="md"
+                className="w-full gap-2 justify-center"
+              >
+                <User className="w-4 h-4" />
+                Log In / Sign Up
+              </Button>
+            </Link>
           )}
 
           <Link href="/request-a-quote" onClick={onClose} className="block">
             <Button variant="primary" size="lg" className="w-full">
-              Request Production Quote
+              Request a Quote
             </Button>
           </Link>
         </div>
 
-        <div className="mt-6 pt-4 border-t border-border-light text-[11px] font-mono text-muted space-y-1">
+        <div className="pt-3 border-t border-border-light flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-zinc-500 font-mono">
+          <Link href="/shipping-and-returns" onClick={onClose} className="hover:text-black">
+            Shipping &amp; Returns
+          </Link>
+          <Link href="/terms-of-service" onClick={onClose} className="hover:text-black">
+            Terms of Service
+          </Link>
+          <Link href="/privacy-policy" onClick={onClose} className="hover:text-black">
+            Privacy Policy
+          </Link>
+        </div>
+
+        <div className="mt-4 pt-3 border-t border-border-light text-[11px] font-mono text-muted space-y-1.5">
           <div className="flex items-center gap-2">
-            <Phone className="w-3.5 h-3.5" />
+            <Phone className="w-3.5 h-3.5 shrink-0" />
             <span>{SITE_CONFIG.phone}</span>
           </div>
           <div className="flex items-center gap-2">
-            <Mail className="w-3.5 h-3.5" />
+            <Mail className="w-3.5 h-3.5 shrink-0" />
             <span>{SITE_CONFIG.email}</span>
+          </div>
+          <div className="text-[10px] text-zinc-500 pt-1 leading-tight">
+            {SITE_CONFIG.address}
           </div>
         </div>
       </div>

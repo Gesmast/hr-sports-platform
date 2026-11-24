@@ -289,6 +289,11 @@ export const stepThreeBaseSchema = z.object({
   has_logo: z.enum(['yes', 'no']).optional(),
   logo_files: z.array(z.string()).optional(),
   logo_placement_note: z.string().optional(),
+  kit_selection: z.string().optional(),
+  top_primary_color: z.string().optional(),
+  top_secondary_color: z.string().optional(),
+  bottom_primary_color: z.string().optional(),
+  bottom_secondary_color: z.string().optional(),
   designFiles: z.array(z.union([designFileSchema, z.string(), z.record(z.any()), z.any()])).optional(),
   designNotes: z.string().max(3000, 'Notes must be within 3,000 characters').optional(),
   primaryColor: z.string().optional(),
@@ -321,6 +326,26 @@ export const stepThreeSchema = stepThreeBaseSchema.superRefine((data, ctx) => {
         path: ['designFiles'],
       });
     }
+  }
+
+  // Section 3: Colors separated by kit selection (Top and/or Bottom)
+  const isTopActive = data.kit_selection === 'shirt_only' || data.kit_selection === 'full_kit' || !data.kit_selection;
+  const isBottomActive = data.kit_selection === 'trouser_only' || data.kit_selection === 'full_kit';
+
+  if (isTopActive && (!data.top_primary_color || data.top_primary_color.trim() === '')) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Top primary colour is required',
+      path: ['top_primary_color'],
+    });
+  }
+
+  if (isBottomActive && (!data.bottom_primary_color || data.bottom_primary_color.trim() === '')) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Bottom primary colour is required',
+      path: ['bottom_primary_color'],
+    });
   }
 });
 
@@ -371,6 +396,10 @@ export const quoteSchema = z.object({
   has_logo: stepThreeBaseSchema.shape.has_logo,
   logo_files: stepThreeBaseSchema.shape.logo_files,
   logo_placement_note: stepThreeBaseSchema.shape.logo_placement_note,
+  top_primary_color: stepThreeBaseSchema.shape.top_primary_color,
+  top_secondary_color: stepThreeBaseSchema.shape.top_secondary_color,
+  bottom_primary_color: stepThreeBaseSchema.shape.bottom_primary_color,
+  bottom_secondary_color: stepThreeBaseSchema.shape.bottom_secondary_color,
   designFiles: stepThreeBaseSchema.shape.designFiles,
   designNotes: stepThreeBaseSchema.shape.designNotes,
   primaryColor: stepThreeBaseSchema.shape.primaryColor,
@@ -438,6 +467,26 @@ export const quoteSchema = z.object({
         path: ['designFiles'],
       });
     }
+  }
+
+  // Section 3: Colors separated by kit selection (Top and/or Bottom)
+  const isTopActive = data.kit_selection === 'shirt_only' || data.kit_selection === 'full_kit' || !data.kit_selection;
+  const isBottomActive = data.kit_selection === 'trouser_only' || data.kit_selection === 'full_kit';
+
+  if (isTopActive && (!data.top_primary_color || data.top_primary_color.trim() === '')) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Top primary colour is required',
+      path: ['top_primary_color'],
+    });
+  }
+
+  if (isBottomActive && (!data.bottom_primary_color || data.bottom_primary_color.trim() === '')) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Bottom primary colour is required',
+      path: ['bottom_primary_color'],
+    });
   }
 });
 

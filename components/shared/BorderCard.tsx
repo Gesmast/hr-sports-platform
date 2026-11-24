@@ -16,18 +16,18 @@ export const BorderCard: React.FC<BorderCardProps> = ({
   ...props
 }) => {
   const variantStyles = {
-    default: 'bg-white border-border text-ink',
-    surface: 'bg-surface border-border text-white',
-    dark: 'bg-ink border-zinc-700 text-white',
-    outline: 'bg-transparent border-border text-ink',
+    default: 'bg-white border-gray-200 text-ink',
+    surface: 'bg-white border-gray-200 text-ink',
+    dark: 'bg-white border-gray-200 text-ink',
+    outline: 'bg-transparent border-gray-200 text-ink',
   };
 
   return (
     <div
       className={cn(
-        'border-hairline rounded-base p-6 sm:p-8 transition-all duration-200',
+        'border rounded-base p-6 sm:p-8 transition-all duration-200',
         variantStyles[variant],
-        hoverEffect && 'hover:border-ink hover:translate-y-[-2px]',
+        hoverEffect && 'hover:border-black hover:translate-y-[-2px] hover:shadow-xs',
         className
       )}
       {...props}

@@ -1,4 +1,5 @@
 import { S3Client, PutObjectCommand, ListObjectsV2Command, GetObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 /**
  * Cloudflare R2 Client configured using the S3-compatible API.
@@ -145,5 +146,30 @@ export async function getNextInquiryNumber(country = 'PK'): Promise<string> {
     return formatInquiryCode(c3, 1);
   }
 }
+
+/**
+ * Generate a secure, expiring presigned URL for downloading a file from Cloudflare R2.
+ * Valid for up to 7 days (604,800 seconds).
+ */
+export async function getPresignedDownloadUrl(
+  key: string,
+  expiresInSeconds = 604800
+): Promise<string | null> {
+  try {
+    const bucket = R2_BUCKET_NAME;
+    if (!bucket) return null;
+
+    const command = new GetObjectCommand({
+      Bucket: bucket,
+      Key: key,
+    });
+
+    return await getSignedUrl(r2Client, command, { expiresIn: expiresInSeconds });
+  } catch (err) {
+    console.error(`[R2 Presigned URL Error] Failed to generate for ${key}:`, err);
+    return null;
+  }
+}
+
 
 

@@ -7,17 +7,40 @@ interface CategoryPageProps {
   params: Promise<{ category: string }>;
 }
 
+function findCategoryBySlug(slug: string) {
+  const normalized = slug.toLowerCase();
+  return styleCategories.find(
+    (c) =>
+      c.slug === normalized ||
+      c.id === normalized ||
+      (normalized === 'soccer-football' && c.slug === 'football') ||
+      (normalized === 'soccer' && c.slug === 'football') ||
+      (normalized === 'activewear' && c.slug === 'gym-activewear') ||
+      (normalized === 'ice-hockey' && c.slug === 'hockey') ||
+      (normalized === 'corporate' && c.slug === 'corporate-uniforms') ||
+      (normalized === 'security' && c.slug === 'security-uniforms') ||
+      (normalized === 'promotional' && c.slug === 'promotional-uniforms')
+  );
+}
+
 export async function generateStaticParams() {
-  return styleCategories.map((c) => ({
-    category: c.slug,
-  }));
+  const slugs = styleCategories.map((c) => ({ category: c.slug }));
+  const legacyAliases = [
+    { category: 'soccer-football' },
+    { category: 'activewear' },
+    { category: 'ice-hockey' },
+    { category: 'corporate' },
+    { category: 'security' },
+    { category: 'promotional' },
+  ];
+  return [...slugs, ...legacyAliases];
 }
 
 export async function generateMetadata({
   params,
 }: CategoryPageProps): Promise<Metadata> {
   const { category: slug } = await params;
-  const category = styleCategories.find((c) => c.slug === slug || c.id === slug);
+  const category = findCategoryBySlug(slug);
 
   if (!category) {
     return {
@@ -26,7 +49,7 @@ export async function generateMetadata({
   }
 
   return {
-    title: `Custom ${category.name} Manufacturing — Styles & Materials | HR Sports`,
+    title: `Custom ${category.name} Manufacturing (Coming Soon) | HR Sports`,
     description: category.description,
     openGraph: {
       title: `Custom ${category.name} | HR Sports OEM`,
@@ -40,7 +63,7 @@ export default async function CategoryDetailPage({
   params,
 }: CategoryPageProps) {
   const { category: slug } = await params;
-  const category = styleCategories.find((c) => c.slug === slug || c.id === slug);
+  const category = findCategoryBySlug(slug);
 
   if (!category) {
     notFound();

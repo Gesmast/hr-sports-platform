@@ -51,6 +51,8 @@ const config: Config = {
       fontFamily: {
         sans: ['var(--font-sans)', 'system-ui', '-apple-system', 'sans-serif'],
         mono: ['var(--font-mono)', 'monospace'],
+        'google-sans': ["'Google Sans'", 'system-ui', '-apple-system', 'sans-serif'],
+        urdu: ["'Baloo Bhaijaan 2'", 'system-ui', '-apple-system', 'sans-serif'],
       },
       borderWidth: {
         hairline: '1px',

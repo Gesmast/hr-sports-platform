@@ -2,7 +2,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'inverted';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'inverted' | 'silver';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
 }
@@ -10,11 +10,14 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', isLoading = false, children, disabled, ...props }, ref) => {
     const variantStyles = {
-      primary: 'bg-burgundy text-white border-burgundy hover:bg-burgundy-hover hover:border-burgundy-hover active:bg-burgundy-active active:translate-y-[1px]',
-      secondary: 'bg-surface text-white border-border hover:bg-zinc-900 active:translate-y-[1px]',
-      outline: 'bg-transparent text-ink border-border hover:bg-zinc-100 active:translate-y-[1px]',
-      ghost: 'bg-transparent text-ink border-transparent hover:bg-zinc-100 active:translate-y-[1px]',
-      inverted: 'bg-surface text-white border-surface hover:bg-zinc-900 active:translate-y-[1px]',
+      primary:
+        'bg-black text-white hover:bg-zinc-800 border border-black shadow-[0_4px_14px_rgba(0,0,0,0.18)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.24)] active:bg-zinc-900 active:translate-y-[1px] font-bold tracking-wider',
+      silver:
+        'bg-black text-white hover:bg-zinc-800 border border-black shadow-[0_4px_14px_rgba(0,0,0,0.18)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.24)] active:bg-zinc-900 active:translate-y-[1px] font-bold tracking-wider',
+      secondary: 'bg-zinc-900 text-white border-zinc-900 hover:bg-zinc-800 active:translate-y-[1px] font-semibold',
+      outline: 'bg-transparent text-black border-zinc-300 hover:bg-zinc-100 hover:text-black active:translate-y-[1px] font-semibold',
+      ghost: 'bg-transparent text-black border-transparent hover:bg-zinc-100 active:translate-y-[1px] font-semibold',
+      inverted: 'bg-white text-black border border-zinc-200 hover:bg-zinc-100 shadow-sm active:translate-y-[1px] font-bold',
     };
 
     const sizeStyles = {
