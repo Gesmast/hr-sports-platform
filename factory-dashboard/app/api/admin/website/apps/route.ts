@@ -15,7 +15,7 @@ export interface AppItem {
   settings: Record<string, any>;
 }
 
-export const DEFAULT_APPS: AppItem[] = [
+const DEFAULT_APPS: AppItem[] = [
   {
     id: 'facebook_community',
     name: 'Facebook & MacBook Showcase',
