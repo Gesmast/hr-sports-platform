@@ -187,7 +187,7 @@ export function renderEmailLayout(options: EmailLayoutOptions): string {
           </div>
         ` : ''}
 
-        <p style="margin: 0 0 6px 0;"><strong>HR Sports</strong> &bull; Sialkot & Lahore Manufacturing Facilities</p>
+        <p style="margin: 0 0 6px 0;"><strong>HR Sports</strong> &bull; Lahore Manufacturing Facility</p>
         <p style="margin: 0 0 6px 0;">Website: <a href="${appUrl}" style="color: #71717A;">thehrsports.com</a> | Support: <a href="mailto:support@thehrsports.com" style="color: #71717A;">support@thehrsports.com</a></p>
 
         ${unsubscribeUrl ? `

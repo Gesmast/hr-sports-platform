@@ -526,7 +526,7 @@ export const themeConfig: Config<ThemeComponentProps> = {
         uniform3Desc: 'Event crew tees, exhibition polos & caps',
         uniform3Link: '/uniforms/promotional-uniforms',
 
-        contactAddress: 'Small Industrial Estate, Shahabpura Road, Sialkot 51310, Punjab, Pakistan',
+        contactAddress: 'Green Building, Block B New Chauburji Park, Multan Road, Lahore, Pakistan',
         contactHours: 'Mon to Saturday 9 am to 10 pm',
         contactPhone: '+92 300 0000000',
         contactEmail: 'sales@thehrsports.com',
@@ -751,7 +751,7 @@ export const themeConfig: Config<ThemeComponentProps> = {
         ctaLink: { type: 'text', label: 'Action Link' },
       },
       defaultProps: {
-        badge: 'DIRECT FROM SIALKOT, PAKISTAN',
+        badge: 'DIRECT FROM LAHORE, PAKISTAN',
         title: 'Crafting World-Class Custom Sports Apparel Since 2008',
         ctaText: 'Explore Categories →',
         ctaLink: '/#styles',
@@ -966,7 +966,7 @@ export const themeConfig: Config<ThemeComponentProps> = {
       },
       defaultProps: {
         heading: 'Industrial Manufacturing Capacity & Infrastructure',
-        subheading: 'Our Sialkot production facility spans automated laser cutting, high-volume thermal sublimation presses, and specialized activewear stitching lines.',
+        subheading: 'Our Lahore production facility spans automated laser cutting, high-volume thermal sublimation presses, and specialized activewear stitching lines.',
       },
       render: (props) => <LiveCapabilityGrid {...props} />,
     },
@@ -1217,7 +1217,7 @@ export const themeConfig: Config<ThemeComponentProps> = {
       },
       defaultProps: {
         heading: 'Factory Direct Manufacturing Specifications',
-        body: 'HR Sports is an established sporting goods and apparel factory based in Sialkot, Pakistan. We specialize in performance technical wear, custom sublimation, and OEM exports to sports clubs globally.',
+        body: 'HR Sports is an established sporting goods and apparel factory based in Lahore, Pakistan. We specialize in performance technical wear, custom sublimation, and OEM exports to sports clubs globally.',
         align: 'center',
         background: 'white',
       },
@@ -1403,7 +1403,7 @@ export const themeConfig: Config<ThemeComponentProps> = {
         muted: true,
         controls: false,
         overlayOpacity: 0.25,
-        heading: 'Engineered In Sialkot. Delivered Worldwide.',
+        heading: 'Engineered In Lahore. Delivered Worldwide.',
         subheading: 'High-performance athletic apparel manufactured directly from raw yarn to finished garments.',
         buttonText: 'Request Factory Quote',
         buttonLink: '/request-a-quote',
@@ -1438,7 +1438,7 @@ export function StorefrontHeaderPreview() {
           </div>
           <div>
             <div className="font-black text-sm tracking-tight text-ink">HR SPORTS</div>
-            <div className="text-[9px] font-mono tracking-wider text-muted uppercase">Factory Direct Sialkot</div>
+            <div className="text-[9px] font-mono tracking-wider text-muted uppercase">Factory Direct Lahore</div>
           </div>
         </div>
 
@@ -1500,7 +1500,7 @@ export function StorefrontFooterPreview() {
           <div className="space-y-3">
             <h4 className="font-mono text-[10px] uppercase tracking-widest text-zinc-400 font-bold">Factory HQ</h4>
             <div className="space-y-1.5 text-zinc-300">
-              <div>Sialkot Industrial Zone, Pakistan</div>
+              <div>Lahore Industrial Hub, Pakistan</div>
               <div>export@thehrsports.com</div>
               <div>24-Hour Quotation Turnaround</div>
             </div>
@@ -1509,7 +1509,7 @@ export function StorefrontFooterPreview() {
 
         <div className="border-t border-zinc-800/80 pt-6 flex flex-col sm:flex-row items-center justify-between text-[11px] font-mono text-zinc-400 gap-2">
           <span>&copy; {new Date().getFullYear()} HR SPORTS MANUFACTURING (PVT) LTD. ALL RIGHTS RESERVED.</span>
-          <span>SIALKOT &bull; LAHORE &bull; WORLDWIDE AIR FREIGHT</span>
+          <span>LAHORE HQ &bull; WORLDWIDE AIR FREIGHT</span>
         </div>
       </div>
     </footer>
@@ -1593,7 +1593,7 @@ export const defaultThemeData: Data<ThemeComponentProps> = {
         apparelPromoSub: 'Send us your idea or design. We make a physical sample for you to check before starting your batch.',
         apparelPromoButtonText: 'See All Styles',
         apparelPromoButtonLink: '/#styles',
-        contactAddress: 'Small Industrial Estate, Shahabpura Road, Sialkot 51310, Punjab, Pakistan',
+        contactAddress: 'Green Building, Block B New Chauburji Park, Multan Road, Lahore, Pakistan',
         contactHours: 'Mon to Saturday 9 am to 10 pm',
         contactPhone: '+92 300 0000000',
         contactEmail: 'sales@thehrsports.com',

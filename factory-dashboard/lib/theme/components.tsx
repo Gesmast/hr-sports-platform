@@ -1276,7 +1276,7 @@ export interface RichTextSectionProps {
 
 export function LiveRichTextSection({
   heading = 'Factory Direct Manufacturing Specifications',
-  body = 'HR Sports is an established sporting goods and apparel factory based in Sialkot, Pakistan. We specialize in performance technical wear, custom sublimation, and OEM exports to sports clubs globally.',
+  body = 'HR Sports is an established sporting goods and apparel factory based in Lahore, Pakistan. We specialize in performance technical wear, custom sublimation, and OEM exports to sports clubs globally.',
   align = 'center',
   background = 'white',
 }: RichTextSectionProps) {
@@ -1419,7 +1419,7 @@ export interface CapabilityGridProps {
 
 export function LiveCapabilityGrid({
   heading = 'Industrial Manufacturing Capacity & Infrastructure',
-  subheading = 'Our Sialkot production facility spans automated laser cutting, high-volume thermal sublimation presses, and specialized activewear stitching lines.',
+  subheading = 'Our Lahore production facility spans automated laser cutting, high-volume thermal sublimation presses, and specialized activewear stitching lines.',
 }: CapabilityGridProps) {
   const metrics = [
     { num: '30,000+', label: 'Monthly Garment Capacity' },
@@ -1632,7 +1632,7 @@ export interface TheHRSportsBannerProps {
 }
 
 export function LiveTheHRSportsBanner({
-  badge = 'DIRECT FROM SIALKOT, PAKISTAN',
+  badge = 'DIRECT FROM LAHORE, PAKISTAN',
   title = 'Crafting World-Class Custom Sports Apparel Since 2008',
   ctaText = 'Explore Categories →',
   ctaLink = '/#styles',
@@ -1741,7 +1741,7 @@ export function LiveVideoSection({
   muted = true,
   controls = false,
   overlayOpacity = 0.25,
-  heading = 'Engineered In Sialkot. Delivered Worldwide.',
+  heading = 'Engineered In Lahore. Delivered Worldwide.',
   subheading = 'High-performance athletic apparel manufactured directly from raw yarn to finished garments.',
   buttonText = 'Request Factory Quote',
   buttonLink = '/request-a-quote',
@@ -1923,7 +1923,7 @@ export function LiveHeaderNav({
   apparelPromoSub = 'Send us your idea or design. We make a physical sample for you to check before starting your batch.',
   apparelPromoButtonText = 'See All Styles',
   apparelPromoButtonLink = '/#styles',
-  contactAddress = 'Small Industrial Estate, Shahabpura Road, Sialkot 51310, Punjab, Pakistan',
+  contactAddress = 'Green Building, Block B New Chauburji Park, Multan Road, Lahore, Pakistan',
   contactHours = 'Mon to Saturday 9 am to 10 pm',
   contactPhone = '+92 300 0000000',
   contactEmail = 'sales@thehrsports.com',

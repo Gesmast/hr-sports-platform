@@ -363,7 +363,7 @@ export default async function ShippingAndReturnsPage() {
               </p>
               <div className="text-[#1D1D1F]/80 text-sm md:text-base space-y-1">
                 <p>{SITE_CONFIG.address}</p>
-                <p>Manufacturing Facility: Sialkot, Punjab, Pakistan</p>
+                <p>Manufacturing Facility: HR SPORTS LAHORE, Green Building, Block B New Chauburji Park, Multan Road, Lahore, Punjab, Pakistan</p>
               </div>
               <div className="pt-4 flex flex-col md:flex-row md:space-x-8 space-y-2 md:space-y-0 text-sm md:text-base">
                 <p>

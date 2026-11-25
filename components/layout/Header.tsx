@@ -668,7 +668,7 @@ export const Header: React.FC = () => {
                               <ArrowRight className="w-3.5 h-3.5 text-zinc-400 group-hover:text-black group-hover:translate-x-0.5 transition-all" />
                             </p>
                             <p className="text-xs text-zinc-500 mt-0.5">
-                              18+ years of OEM precision manufacturing in Sialkot
+                              18+ years of OEM precision manufacturing in Lahore
                             </p>
                           </div>
                         </Link>
