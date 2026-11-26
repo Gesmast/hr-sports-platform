@@ -82,8 +82,8 @@ export default async function PrivacyPolicyPage() {
           <div className="space-y-6 text-base md:text-lg leading-relaxed text-[#1D1D1F]/80">
             <p>
               This Privacy Policy describes how <strong>{SITE_CONFIG.legalName}</strong> (&ldquo;we&rdquo;, &ldquo;us&rdquo;, or &ldquo;our&rdquo;), collects, uses, and discloses your personal and business information when you visit, request quotes, or purchase custom athletic apparel and sportswear manufacturing services from{' '}
-              <a href="https://hrsports.com" className="text-black font-semibold underline underline-offset-4 hover:opacity-75">
-                hrsports.com
+              <a href="https://thehrsports.com" className="text-black font-semibold underline underline-offset-4 hover:opacity-75">
+                thehrsports.com
               </a>{' '}
               (the &ldquo;Site&rdquo;), or interact with our client portal.
             </p>
@@ -221,10 +221,43 @@ export default async function PrivacyPolicyPage() {
             <hr className="border-[#1D1D1F]/10 mt-16" />
           </section>
 
-          {/* Section 4 */}
+          {/* Section 4 - Google API User Data Policy */}
           <section className="scroll-mt-32">
             <h2 className="text-2xl font-black uppercase italic tracking-tight mb-8 text-[#1D1D1F] border-l-4 border-black pl-4">
-              4. International Data Transfers
+              4. Google User Data &amp; OAuth Authentication
+            </h2>
+            <div className="space-y-6">
+              <p className="text-base md:text-lg text-[#1D1D1F]/80 leading-relaxed">
+                When you choose to sign in to the HR Sports Client Portal using <strong>Sign in with Google</strong>, we access only the basic profile data provided by Google (specifically your name, email address, and profile picture avatar) for the exclusive purpose of authenticating your identity and granting access to your custom apparel manufacturing orders, tech pack specifications, and production tracking dashboard.
+              </p>
+
+              <div className="bg-[#F5F5F7] p-8 rounded-2xl border border-[#1D1D1F]/5 space-y-4 text-[#1D1D1F]/80 text-sm md:text-base">
+                <p>
+                  <strong>How We Use Google Data:</strong>
+                </p>
+                <ul className="space-y-2 list-disc pl-6">
+                  <li>To create and authenticate your client portal session securely.</li>
+                  <li>To associate your submitted garment inquiries, tech packs, and manufacturing orders with your verified email address.</li>
+                  <li>To send essential production status updates and order completion notices.</li>
+                </ul>
+                <p className="pt-2">
+                  <strong>Strict Limited Use &amp; Privacy Protections:</strong>
+                </p>
+                <ul className="space-y-2 list-disc pl-6">
+                  <li>We <strong>do not</strong> request access to sensitive Google scopes (such as Google Drive, Gmail, or Contacts).</li>
+                  <li>We <strong>never sell</strong> Google user data to third parties, data brokers, or advertisers.</li>
+                  <li>We <strong>never use</strong> Google user data for personalized advertising or marketing surveillance.</li>
+                  <li>HR Sports&apos;s use and transfer of information received from Google APIs to any other app will adhere to the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer" className="text-black font-semibold underline underline-offset-2">Google API Services User Data Policy</a>, including the Limited Use requirements.</li>
+                </ul>
+              </div>
+            </div>
+            <hr className="border-[#1D1D1F]/10 mt-16" />
+          </section>
+
+          {/* Section 5 */}
+          <section className="scroll-mt-32">
+            <h2 className="text-2xl font-black uppercase italic tracking-tight mb-8 text-[#1D1D1F] border-l-4 border-black pl-4">
+              5. International Data Transfers
             </h2>
             <div className="space-y-6">
               <p className="text-base md:text-lg text-[#1D1D1F]/80 leading-relaxed">
@@ -234,10 +267,10 @@ export default async function PrivacyPolicyPage() {
             <hr className="border-[#1D1D1F]/10 mt-16" />
           </section>
 
-          {/* Section 5 */}
+          {/* Section 6 */}
           <section className="scroll-mt-32">
             <h2 className="text-2xl font-black uppercase italic tracking-tight mb-8 text-[#1D1D1F] border-l-4 border-black pl-4">
-              5. Your Rights
+              6. Your Rights
             </h2>
             <div className="space-y-6">
               <p className="text-base md:text-lg text-[#1D1D1F]/80 leading-relaxed">
@@ -250,10 +283,10 @@ export default async function PrivacyPolicyPage() {
             <hr className="border-[#1D1D1F]/10 mt-16" />
           </section>
 
-          {/* Section 6 */}
+          {/* Section 7 */}
           <section className="scroll-mt-32">
             <h2 className="text-2xl font-black uppercase italic tracking-tight mb-8 text-[#1D1D1F] border-l-4 border-black pl-4">
-              6. Retention
+              7. Retention
             </h2>
             <div className="space-y-6">
               <p className="text-base md:text-lg text-[#1D1D1F]/80 leading-relaxed">
@@ -263,10 +296,10 @@ export default async function PrivacyPolicyPage() {
             <hr className="border-[#1D1D1F]/10 mt-16" />
           </section>
 
-          {/* Section 7 */}
+          {/* Section 8 */}
           <section className="scroll-mt-32">
             <h2 className="text-2xl font-black uppercase italic tracking-tight mb-8 text-[#1D1D1F] border-l-4 border-black pl-4">
-              7. Contact Us
+              8. Contact Us
             </h2>
             <div className="space-y-6">
               <p className="text-base md:text-lg text-[#1D1D1F]/80 leading-relaxed">
