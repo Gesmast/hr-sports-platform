@@ -255,7 +255,7 @@ export const Hero: React.FC<HeroProps> = ({
           <div className="lg:col-span-6 xl:col-span-6 space-y-5 sm:space-y-6 pt-0.5">
             
             {/* Giant Stacked Brutalist Headline */}
-            <motion.div
+            <motion.h1
               initial={{ opacity: 0, y: 16, filter: 'blur(6px)' }}
               animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
@@ -265,7 +265,7 @@ export const Hero: React.FC<HeroProps> = ({
               <div>{headline1}</div>
               <div>{headline2}</div>
               <div className="text-zinc-400">{headline3}</div>
-            </motion.div>
+            </motion.h1>
 
             {/* Sub-heading & Description */}
             <motion.div
