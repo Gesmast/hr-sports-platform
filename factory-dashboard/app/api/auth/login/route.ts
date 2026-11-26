@@ -75,7 +75,7 @@ export async function POST(request: Request) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://pkbyeviilqdzlcvwndnd.supabase.co';
     const serviceKey =
       process.env.SUPABASE_SERVICE_ROLE_KEY ||
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBrYnlldmlpbHFkemxjdnduZG5kIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MDM0NzE2NiwiZXhwIjoyMTA1OTIzMTY2fQ.ES31Zo4-DcTXwoyL8_dKFRuAdKBSzqE4AYyLAERm0Eg';
+      '';
     const anonKey =
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBrYnlldmlpbHFkemxjdnduZG5kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAzNDcxNjYsImV4cCI6MjEwNTkyMzE2Nn0.duG8tATITL7KCAP2I_fLl_IvRL-r-FZY-6y1dvyoahY';

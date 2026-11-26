@@ -5,7 +5,7 @@ function getAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://pkbyeviilqdzlcvwndnd.supabase.co';
   const key =
     process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBrYnlldmlpbHFkemxjdnduZG5kIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MDM0NzE2NiwiZXhwIjoyMTA1OTIzMTY2fQ.ES31Zo4-DcTXwoyL8_dKFRuAdKBSzqE4AYyLAERm0Eg';
+    '';
 
   return createClient(url, key, {
     auth: { persistSession: false, autoRefreshToken: false },
